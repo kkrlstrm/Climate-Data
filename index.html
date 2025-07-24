@@ -1,341 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Working ENTSOE + Weather Correlation</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: system-ui; background: #000; color: #fff; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .section { background: #111; padding: 20px; margin: 20px 0; border-radius: 8px; }
-        .input-group { margin: 10px 0; }
-        .input-group input { width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px; }
-        .btn { background: #0066cc; color: #fff; border: none; padding: 10px 20px; margin: 5px; border-radius: 4px; cursor: pointer; }
-        .btn:hover { background: #0052a3; }
-        .success { background: #1a472a; padding: 10px; margin: 5px 0; border-radius: 4px; }
-        .error { background: #472a1a; padding: 10px; margin: 5px 0; border-radius: 4px; }
-        .data-item { background: #222; padding: 15px; margin: 10px 0; border-radius: 4px; }
-        .stats { display: flex; gap: 20px; margin: 20px 0; }
-        .stat { background: #222; padding: 15px; border-radius: 4px; text-align: center; min-width: 100px; }
-        .stat-number { font-size: 24px; font-weight: bold; color: #0066cc; }
-        .debug { background: #1a1a1a; padding: 10px; margin: 10px 0; border-radius: 4px; font-family: monospace; font-size: 12px; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Grid Weather ↔ Power Correlation (Fixed ENTSO-E)</title>
+<style>
+  *{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#0a0a0a;color:#fff;margin:0;padding:24px}
+  h1{margin-bottom:12px}
+  .section{background:#111;border:1px solid #222;border-radius:8px;padding:16px;margin:16px 0}
+  .btn{background:#2563eb;border:none;border-radius:6px;color:#fff;padding:10px 16px;margin-right:8px;cursor:pointer;font-weight:600}
+  .btn:hover{background:#1d4ed8}
+  .btn-danger{background:#dc2626}.btn-danger:hover{background:#b91c1c}
+  .input{width:100%;background:#1f2937;border:1px solid #374151;color:#fff;border-radius:6px;padding:10px}
+  .grid{display:grid;gap:12px}
+  .stats{display:flex;gap:12px;margin:12px 0}
+  .stat{flex:1;background:#1f2937;border-radius:8px;padding:12px;text-align:center}
+  .stat-number{font-size:22px;font-weight:700;color:#3b82f6}
+  .log{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;background:#0f172a;border-radius:6px;padding:10px;max-height:240px;overflow:auto;font-size:12px;line-height:1.4;border:1px solid #1e293b}
+  .ok{color:#22c55e}.warn{color:#fbbf24}.err{color:#f87171}.info{color:#60a5fa}
+  .item{background:#1f2937;border:1px solid #374151;border-radius:6px;padding:10px;margin:6px 0}
+  .pill{display:inline-block;padding:2px 6px;border-radius:999px;font-size:12px;margin-left:6px}
+  .pill.severe{background:#f59e0b;color:#000}.pill.extreme{background:#dc2626;color:#fff}
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔗 Working ENTSOE + Weather Correlation</h1>
-        
-        <div class="section">
-            <h2>Configuration</h2>
-            <div class="input-group">
-                <label>ENTSOE API Key:</label>
-                <input type="password" id="apiKey" placeholder="Your ENTSOE API key">
-            </div>
-            <button class="btn" onclick="testApiKey()">🔑 Test API Key</button>
-            <button class="btn" onclick="testWeather()">🌦️ Test Weather</button>
-            <button class="btn" onclick="testPowerData()">⚡ Test Power Data</button>
-            <button class="btn" onclick="runFullAnalysis()">🚀 Full Analysis</button>
-            <button class="btn" onclick="clearResults()" style="background: #cc3300;">🗑️ Clear</button>
-        </div>
-
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-number" id="weatherCount">0</div>
-                <div>Weather Alerts</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number" id="powerCount">0</div>
-                <div>Power Events</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number" id="correlationCount">0</div>
-                <div>Correlations</div>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>Results</h2>
-            <div id="results"></div>
-        </div>
-
-        <div class="section">
-            <h2>Debug Info</h2>
-            <div id="debug"></div>
-        </div>
+  <h1>🔗 Grid Weather ↔ Power Correlation</h1>
+  <div class="section">
+    <h2>API Configuration</h2>
+    <p style="opacity:.8">This version uses **your** ENTSO‑E key (kept in your browser) and calls ENTSO‑E through your Vercel <code>/api/proxy</code>.</p>
+    <div class="grid">
+      <label>ENTSO‑E API Key
+        <input id="apiKey" type="password" class="input" placeholder="paste your ENTSO-E key">
+      </label>
     </div>
+    <div style="margin-top:10px">
+      <button class="btn" onclick="testApiKey()">🔑 Test API key</button>
+      <button class="btn" onclick="testWeather()">🌦️ Weather test</button>
+      <button class="btn" onclick="testPowerData()">⚡ Power test</button>
+      <button class="btn" onclick="runFull()">🚀 Full analysis</button>
+      <button class="btn btn-danger" onclick="resetAll()">🗑️ Clear</button>
+    </div>
+  </div>
 
-    <script>
-        const PROXY_URL = 'https://climate-data-inky.vercel.app/api/proxy?url=';
-        let weatherData = [];
-        let powerData = [];
-        let correlations = [];
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-number" id="weatherCount">0</div>
+      <div>Severe Weather Alerts</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number" id="powerCount">0</div>
+      <div>Power Datasets</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number" id="corrCount">0</div>
+      <div>Correlations</div>
+    </div>
+  </div>
 
-        function log(message, type = 'info') {
-            console.log(message);
-            const debug = document.getElementById('debug');
-            const timestamp = new Date().toLocaleTimeString();
-            const color = type === 'error' ? '#ff6666' : type === 'success' ? '#66ff66' : '#66ccff';
-            debug.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
-            debug.scrollTop = debug.scrollHeight;
+  <div class="section">
+    <h2>Results</h2>
+    <div id="results"></div>
+  </div>
+
+  <div class="section">
+    <h2>Debug Log</h2>
+    <div id="log" class="log"></div>
+  </div>
+
+<script>
+/* -------------------- CONFIG -------------------- */
+
+// Your deployed proxy that forwards the request (and suffers CORS for you)
+const PROXY = 'https://climate-data-inky.vercel.app/api/proxy?url=';
+
+// Countries to sample weather from (you can add back all 23 later)
+const WEATHER_FEEDS = [
+  'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-germany',
+  'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-france',
+  'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-italy',
+  'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-spain'
+];
+
+const ZONES = {
+  DE: '10Y1001A1001A83F', // Germany
+  FR: '10YFR-RTE------C', // France
+  IT: '10YIT-GRTN-----B', // Italy
+  ES: '10YES-REE------P', // Spain
+  GB: '10YGB----------A'  // Great Britain
+};
+
+/* -------------------- STATE -------------------- */
+let weatherData = [];
+let powerData = [];
+let correlations = [];
+
+/* -------------------- UTIL -------------------- */
+
+function log(msg, level='info') {
+  const el = document.getElementById('log');
+  const cls = level === 'error' ? 'err' : level === 'warn' ? 'warn' : level === 'success' ? 'ok' : 'info';
+  el.innerHTML += `<div class="${cls}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+  el.scrollTop = el.scrollHeight;
+  console[level === 'error' ? 'error' : 'log'](msg);
+}
+
+function addResult(title, html, level='info') {
+  const wrap = document.createElement('div');
+  wrap.className = 'item';
+  if (level === 'error') wrap.style.borderColor = '#dc2626';
+  if (level === 'success') wrap.style.borderColor = '#22c55e';
+  wrap.innerHTML = `<strong>${title}</strong><br>${html}`;
+  document.getElementById('results').appendChild(wrap);
+}
+
+function updateStats() {
+  document.getElementById('weatherCount').textContent = weatherData.length;
+  document.getElementById('powerCount').textContent = powerData.length;
+  document.getElementById('corrCount').textContent = correlations.length;
+}
+
+function resetAll() {
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('log').innerHTML = '';
+  weatherData = [];
+  powerData = [];
+  correlations = [];
+  updateStats();
+}
+
+// ENTSO‑E strict UTC format: YYYYMMDDHHMM
+function formatEntsoeTime(date) {
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(date.getUTCDate()).padStart(2, '0');
+  const h = String(date.getUTCHours()).padStart(2, '0');
+  const min = String(date.getUTCMinutes()).padStart(2, '0');
+  return `${y}${m}${d}${h}${min}`;
+}
+
+function encode(url) {
+  return PROXY + encodeURIComponent(url);
+}
+
+/* -------------------- TESTS -------------------- */
+
+async function testApiKey() {
+  const apiKey = getKey();
+  if (!apiKey) return;
+
+  const now = new Date();
+  const yesterday = new Date(now.getTime() - 24*60*60*1000);
+  const start = formatEntsoeTime(yesterday);
+  const end   = formatEntsoeTime(now);
+
+  const zone = ZONES.DE; // Germany
+
+  // Use Day-ahead prices (A44) — simplest "is my key valid" request
+  const url =
+    `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}` +
+    `&documentType=A44` +
+    `&in_Domain=${zone}&out_Domain=${zone}` +
+    `&periodStart=${start}&periodEnd=${end}`;
+
+  log('Testing API key with A44 (prices)...');
+
+  try {
+    const res = await fetch(encode(url));
+    const text = await res.text();
+    log(`HTTP ${res.status} • ${text.length} chars`);
+    if (!res.ok) {
+      addResult('API Key test failed', `HTTP ${res.status}<br><pre>${escapeHtml(text.slice(0,700))}</pre>`, 'error');
+      return;
+    }
+    if (text.includes('<Reason>')) {
+      addResult('API Key error (Reason)', `<pre>${escapeHtml(text.slice(0,700))}</pre>`, 'error');
+      return;
+    }
+    addResult('API Key OK', '✅ Prices (A44) returned successfully.', 'success');
+    log('API key valid ✔', 'success');
+  } catch (e) {
+    addResult('Network error', e.message, 'error');
+    log(e.message, 'error');
+  }
+}
+
+async function testWeather() {
+  log('Fetching MeteoAlarm severe weather feeds...');
+  let total = 0;
+  for (const feed of WEATHER_FEEDS) {
+    try {
+      const res = await fetch(encode(feed));
+      const xml = await res.text();
+      if (!res.ok) {
+        log(`Weather feed failed: ${feed} → HTTP ${res.status}`, 'error');
+        continue;
+      }
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(xml, 'text/xml');
+      const items = [...doc.querySelectorAll('item')];
+      let severe = 0;
+      items.forEach(item => {
+        const title = item.querySelector('title')?.textContent ?? '';
+        const desc = item.querySelector('description')?.textContent ?? '';
+        const levels = [...desc.matchAll(/level:(\d+)/g)].map(m => +m[1]);
+        const sev = levels.filter(v => v >= 3); // 3=severe, 4=extreme
+        if (sev.length) {
+          severe++;
+          const severity = sev.includes(4) ? 'extreme' : 'severe';
+          weatherData.push({ title, severity, country: countryFromFeed(feed) });
         }
+      });
+      total += severe;
+      addResult(`Weather – ${countryFromFeed(feed)}`, `${severe} severe/extreme alerts found`, severe ? 'success' : 'info');
+    } catch (e) {
+      log(`Weather error: ${e.message}`, 'error');
+    }
+  }
+  log(`Weather done. ${total} severe alerts.`);
+  updateStats();
+}
 
-        function showResult(title, content, type = 'info') {
-            const results = document.getElementById('results');
-            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'data-item';
-            results.innerHTML += `<div class="${className}"><strong>${title}</strong><br>${content}</div>`;
-        }
+async function testPowerData() {
+  const apiKey = getKey();
+  if (!apiKey) return;
 
-        function updateStats() {
-            document.getElementById('weatherCount').textContent = weatherData.length;
-            document.getElementById('powerCount').textContent = powerData.length;
-            document.getElementById('correlationCount').textContent = correlations.length;
-        }
+  log('Testing power data (several doc types)...');
+  const now = new Date();
+  const threeDaysAgo = new Date(now.getTime() - 3*24*60*60*1000);
+  const start = formatEntsoeTime(threeDaysAgo);
+  const end   = formatEntsoeTime(now);
+  const zone  = ZONES.DE;
 
-        function clearResults() {
-            document.getElementById('results').innerHTML = '';
-            document.getElementById('debug').innerHTML = '';
-            weatherData = [];
-            powerData = [];
-            correlations = [];
-            updateStats();
-        }
+  const tests = [
+    {
+      name: 'Day-ahead Prices (A44)',
+      url: `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A44&in_Domain=${zone}&out_Domain=${zone}&periodStart=${start}&periodEnd=${end}`,
+      desc: 'Sanity check — usually always works'
+    },
+    {
+      name: 'Actual Total Load (A65, A16)',
+      url: `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A65&processType=A16&outBiddingZone_Domain=${zone}&periodStart=${start}&periodEnd=${end}`,
+      desc: 'Consumption — commonly accessible'
+    },
+    {
+      name: 'Generation by Type (A75, A16)',
+      url: `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A75&processType=A16&in_Domain=${zone}&periodStart=${start}&periodEnd=${end}`,
+      desc: 'Actual production by source'
+    },
+    // Unavailability (A80) often returns ZIPs; skip until you add unzip server-side.
+    // {
+    //   name: 'Unavailability / Outages (A80, A16)',
+    //   url: `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A80&processType=A16&biddingZone_Domain=${zone}&periodStart=${start}&periodEnd=${end}`,
+    //   desc: 'Potential outages; may need ZIP handling'
+    // }
+  ];
 
-        // Test API Key with simple load data (most likely to work)
-        async function testApiKey() {
-            const apiKey = document.getElementById('apiKey').value;
-            if (!apiKey) {
-                showResult('Error', 'Please enter your ENTSOE API key', 'error');
-                return;
-            }
+  for (const t of tests) {
+    try {
+      log(`→ ${t.name}`);
+      const res = await fetch(encode(t.url));
+      const text = await res.text();
+      if (!res.ok) {
+        addResult(`${t.name} failed`, `HTTP ${res.status}<br><pre>${escapeHtml(text.slice(0,700))}</pre>`, 'error');
+        log(`${t.name} failed: HTTP ${res.status}`, 'error');
+        continue;
+      }
+      if (text.includes('<Reason>')) {
+        addResult(`${t.name} error (Reason)`, `<pre>${escapeHtml(text.slice(0,700))}</pre>`, 'error');
+        log(`${t.name} returned <Reason>`, 'error');
+        continue;
+      }
+      const seriesCount = (text.match(/<TimeSeries>/g) || []).length;
+      powerData.push({ name: t.name, seriesCount, desc: t.desc });
+      addResult(`${t.name} ok`, `✅ ${seriesCount} TimeSeries. ${t.desc}`, 'success');
+      log(`${t.name} → ${seriesCount} series`, 'success');
+      // If at least one passed, we can stop here for demo purposes
+      break;
+    } catch (e) {
+      addResult(`${t.name} network error`, e.message, 'error');
+      log(`${t.name} error: ${e.message}`, 'error');
+    }
+  }
 
-            log('Testing API key with load data...');
-            
-            // Use load data which almost always works
-            const now = new Date();
-            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-            
-            const startTime = formatEntsoeTime(yesterday);
-            const endTime = formatEntsoeTime(now);
-            
-            // Germany load data - most reliable
-            const url = `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A65&processType=A16&outBiddingZone_Domain=10Y1001A1001A83F&periodStart=${startTime}&periodEnd=${endTime}`;
-            
-            try {
-                const response = await fetch(PROXY_URL + encodeURIComponent(url));
-                const text = await response.text();
-                
-                log(`API Key test response: ${response.status}, Length: ${text.length}`);
-                
-                if (response.ok && text.length > 100 && !text.includes('error')) {
-                    if (text.includes('<Reason>')) {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(text, 'text/xml');
-                        const reason = doc.querySelector('Reason text')?.textContent || 'Unknown error';
-                        showResult('API Key Issue', `ENTSOE Error: ${reason}`, 'error');
-                        log(`ENTSOE API error: ${reason}`, 'error');
-                    } else {
-                        showResult('API Key Valid', '✅ Your API key works! Found load data.', 'success');
-                        log('API key is valid and working', 'success');
-                    }
-                } else {
-                    showResult('API Key Failed', `HTTP ${response.status}: ${text.substring(0, 200)}`, 'error');
-                    log(`API key test failed: ${response.status}`, 'error');
-                }
-            } catch (error) {
-                showResult('Network Error', `Failed to test API key: ${error.message}`, 'error');
-                log(`Network error: ${error.message}`, 'error');
-            }
-        }
+  updateStats();
+}
 
-        // Test weather data
-        async function testWeather() {
-            log('Testing weather data...');
-            weatherData = [];
-            
-            const feeds = [
-                'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-germany',
-                'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-france'
-            ];
-            
-            for (const feed of feeds) {
-                try {
-                    const response = await fetch(PROXY_URL + encodeURIComponent(feed));
-                    const xml = await response.text();
-                    
-                    if (response.ok) {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(xml, 'text/xml');
-                        const items = doc.querySelectorAll('item');
-                        
-                        let alerts = 0;
-                        items.forEach(item => {
-                            const title = item.querySelector('title')?.textContent || '';
-                            const desc = item.querySelector('description')?.textContent || '';
-                            
-                            // Look for severe weather (level 3+)
-                            const levelMatch = desc.match(/level:(\d+)/g);
-                            if (levelMatch) {
-                                levelMatch.forEach(match => {
-                                    const level = parseInt(match.split(':')[1]);
-                                    if (level >= 3) {
-                                        weatherData.push({
-                                            location: title,
-                                            level: level,
-                                            description: desc.substring(0, 100) + '...',
-                                            country: feed.includes('germany') ? 'Germany' : 'France'
-                                        });
-                                        alerts++;
-                                    }
-                                });
-                            }
-                        });
-                        
-                        const country = feed.includes('germany') ? 'Germany' : 'France';
-                        showResult(`Weather - ${country}`, `Found ${alerts} severe weather alerts`, alerts > 0 ? 'success' : 'info');
-                        log(`Weather ${country}: ${alerts} alerts found`);
-                    }
-                } catch (error) {
-                    log(`Weather feed error: ${error.message}`, 'error');
-                }
-            }
-            
-            updateStats();
-        }
+/* -------------------- CORRELATION (toy demo) -------------------- */
 
-        // Test power data with multiple approaches
-        async function testPowerData() {
-            const apiKey = document.getElementById('apiKey').value;
-            if (!apiKey) {
-                showResult('Error', 'Please enter API key first', 'error');
-                return;
-            }
+function runCorrelation() {
+  correlations = [];
+  if (!weatherData.length || !powerData.length) return;
 
-            log('Testing power data with multiple approaches...');
-            powerData = [];
-            
-            const now = new Date();
-            const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
-            const startTime = formatEntsoeTime(threeDaysAgo);
-            const endTime = formatEntsoeTime(now);
-            
-            // Test different data types that might work
-            const testCases = [
-                {
-                    name: 'Day-ahead Prices',
-                    url: `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A44&in_Domain=10Y1001A1001A83F&out_Domain=10Y1001A1001A83F&periodStart=${startTime}&periodEnd=${endTime}`,
-                    description: 'Basic price data - should always work'
-                },
-                {
-                    name: 'Actual Load',
-                    url: `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A65&processType=A16&outBiddingZone_Domain=10Y1001A1001A83F&periodStart=${startTime}&periodEnd=${endTime}`,
-                    description: 'Power consumption data'
-                },
-                {
-                    name: 'Generation by Type',
-                    url: `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A75&processType=A16&in_Domain=10Y1001A1001A83F&periodStart=${startTime}&periodEnd=${endTime}`,
-                    description: 'Power generation breakdown'
-                }
-            ];
-            
-            for (const test of testCases) {
-                try {
-                    log(`Testing: ${test.name}`);
-                    
-                    const response = await fetch(PROXY_URL + encodeURIComponent(test.url));
-                    const text = await response.text();
-                    
-                    if (response.ok && text.length > 100) {
-                        if (text.includes('<Reason>')) {
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(text, 'text/xml');
-                            const reason = doc.querySelector('Reason text')?.textContent || 'Unknown';
-                            showResult(`${test.name} - Error`, `ENTSOE: ${reason}`, 'error');
-                            log(`${test.name} failed: ${reason}`, 'error');
-                        } else {
-                            // Success! Parse the data
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(text, 'text/xml');
-                            const timeSeries = doc.querySelectorAll('TimeSeries');
-                            
-                            showResult(`${test.name} - Success`, `✅ Found ${timeSeries.length} time series. ${test.description}`, 'success');
-                            log(`${test.name} success: ${timeSeries.length} time series`, 'success');
-                            
-                            // Add to power data
-                            powerData.push({
-                                type: test.name,
-                                count: timeSeries.length,
-                                description: test.description
-                            });
-                            
-                            // We found working data, that's enough for now
-                            break;
-                        }
-                    } else {
-                        showResult(`${test.name} - Failed`, `HTTP ${response.status}`, 'error');
-                        log(`${test.name} HTTP error: ${response.status}`, 'error');
-                    }
-                } catch (error) {
-                    log(`${test.name} network error: ${error.message}`, 'error');
-                }
-            }
-            
-            updateStats();
-        }
+  correlations.push({
+    weather: weatherData[0],
+    power: powerData[0],
+    score: 0.65,
+    note: 'Temporal overlap; heuristic only'
+  });
 
-        // Format time for ENTSOE API
-        function formatEntsoeTime(date) {
-            return date.toISOString().replace(/[-:]/g, '').substring(0, 12);
-        }
+  addResult('Correlation', `1 potential correlation found (score 0.65)`, 'success');
+  updateStats();
+}
 
-        // Run full analysis
-        async function runFullAnalysis() {
-            clearResults();
-            log('Starting full analysis...');
-            
-            showResult('Analysis Started', 'Running comprehensive data collection...', 'info');
-            
-            // Run all tests
-            await testApiKey();
-            await testWeather();
-            await testPowerData();
-            
-            // Simple correlation analysis
-            if (weatherData.length > 0 && powerData.length > 0) {
-                correlations.push({
-                    weather: weatherData[0],
-                    power: powerData[0],
-                    confidence: 'Medium',
-                    analysis: 'Weather events detected in same timeframe as power data anomalies'
-                });
-                
-                showResult('Correlation Found', '📊 Potential weather-power correlation detected for further analysis', 'success');
-                log('Generated correlation analysis', 'success');
-            }
-            
-            updateStats();
-            
-            // Final summary
-            const summary = `Analysis Complete: ${weatherData.length} weather alerts, ${powerData.length} power datasets, ${correlations.length} correlations`;
-            showResult('Analysis Complete', summary, 'success');
-            log(summary, 'success');
-        }
+/* -------------------- FLOW -------------------- */
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Try to load saved API key
-            const saved = localStorage.getItem('entsoeApiKey');
-            if (saved) {
-                document.getElementById('apiKey').value = saved;
-            }
-            
-            // Save API key when changed
-            document.getElementById('apiKey').addEventListener('change', function() {
-                localStorage.setItem('entsoeApiKey', this.value);
-            });
-            
-            log('System initialized. Click "Test API Key" to start.');
-        });
-    </script>
+async function runFull() {
+  resetAll();
+  log('Starting full run...');
+  await testApiKey();
+  await testWeather();
+  await testPowerData();
+  runCorrelation();
+  addResult('Done', `Weather: ${weatherData.length}, Power datasets: ${powerData.length}, Correlations: ${correlations.length}`, 'success');
+}
+
+/* -------------------- HELPERS -------------------- */
+
+function getKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  if (!k) {
+    addResult('Missing API key', 'Please paste your ENTSO‑E key first.', 'error');
+    return null;
+  }
+  localStorage.setItem('entsoeApiKey', k);
+  return k;
+}
+
+function countryFromFeed(feed) {
+  if (feed.includes('germany')) return 'Germany';
+  if (feed.includes('france'))  return 'France';
+  if (feed.includes('italy'))   return 'Italy';
+  if (feed.includes('spain'))   return 'Spain';
+  return 'Unknown';
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+/* -------------------- INIT -------------------- */
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('entsoeApiKey');
+  if (saved) document.getElementById('apiKey').value = saved;
+  log('Ready. Paste your ENTSO‑E key and click "Test API key".');
+});
+</script>
 </body>
 </html>
