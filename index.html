@@ -402,6 +402,7 @@
                 <div class="tab active" onclick="switchTab('weather')">Weather</div>
                 <div class="tab" onclick="switchTab('outages')">Outages</div>
                 <div class="tab" onclick="switchTab('correlations')">Correlations</div>
+                <div class="tab" onclick="switchTab('debug')">Debug</div>
             </div>
 
             <div class="tab-content">
@@ -450,6 +451,37 @@
                     </div>
                     <div id="correlationsList" class="loading">
                         Analyzing correlations...
+                    </div>
+                </div>
+
+                <div id="debugTab" style="display: none;">
+                    <div class="config-section">
+                        <h3>API Debug Info</h3>
+                        <div class="alert-item">
+                            <div class="alert-details">
+                                <strong>Last ENTSOE API Call:</strong><br>
+                                <div id="lastApiCall" style="font-family: monospace; font-size: 11px; word-break: break-all;">None</div>
+                            </div>
+                        </div>
+                        <div class="alert-item">
+                            <div class="alert-details">
+                                <strong>API Response Status:</strong><br>
+                                <div id="apiStatus">No calls made</div>
+                            </div>
+                        </div>
+                        <div class="alert-item">
+                            <div class="alert-details">
+                                <strong>Raw XML Response (first 500 chars):</strong><br>
+                                <div id="rawXml" style="font-family: monospace; font-size: 11px; max-height: 150px; overflow-y: auto; background: #374151; padding: 8px; border-radius: 4px;">None</div>
+                            </div>
+                        </div>
+                        <div class="alert-item">
+                            <div class="alert-details">
+                                <strong>Console Errors:</strong><br>
+                                <div id="consoleErrors" style="font-family: monospace; font-size: 11px; color: #fca5a5;">None</div>
+                            </div>
+                        </div>
+                        <button class="btn" onclick="testSingleApiCall()">🧪 Test Single API Call</button>
                     </div>
                 </div>
             </div>
@@ -550,8 +582,68 @@
             document.getElementById('weatherTab').style.display = 'none';
             document.getElementById('outagesTab').style.display = 'none';
             document.getElementById('correlationsTab').style.display = 'none';
+            document.getElementById('debugTab').style.display = 'none';
             
             document.getElementById(tabName + 'Tab').style.display = 'block';
+        }
+
+        async function testSingleApiCall() {
+            const apiKey = document.getElementById('entsoeApiKey').value;
+            if (!apiKey) {
+                updateDebugInfo('No API key provided', 'Error', 'N/A', 'Please enter API key');
+                return;
+            }
+
+            const now = new Date();
+            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            const startTime = formatDateTime(yesterday);
+            const endTime = formatDateTime(now);
+            
+            // Test with Germany (largest zone, most likely to have data)
+            const testZone = '10Y1001A1001A83F';
+            const url = `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A80&processType=A16&biddingZone_Domain=${testZone}&periodStart=${startTime}&periodEnd=${endTime}`;
+            
+            updateDebugInfo(url, 'Testing...', 'N/A', 'Making API call...');
+            
+            try {
+                console.log('Testing ENTSOE API call:', url);
+                const response = await fetch(url);
+                const xmlText = await response.text();
+                
+                console.log('Response status:', response.status);
+                console.log('Response text length:', xmlText.length);
+                console.log('First 500 chars:', xmlText.substring(0, 500));
+                
+                updateDebugInfo(
+                    url,
+                    `Status: ${response.status} ${response.statusText}`,
+                    xmlText.substring(0, 500),
+                    response.ok ? 'Success' : 'HTTP Error'
+                );
+                
+                if (xmlText.includes('<Reason>')) {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                    const reason = xmlDoc.querySelector('Reason text')?.textContent || 'Unknown error';
+                    updateDebugInfo(url, `ENTSOE Error: ${reason}`, xmlText.substring(0, 500), 'ENTSOE API Error');
+                }
+                
+            } catch (error) {
+                console.error('API call failed:', error);
+                updateDebugInfo(
+                    url,
+                    `Fetch Error: ${error.message}`,
+                    'N/A',
+                    `Network/CORS Error: ${error.message}`
+                );
+            }
+        }
+
+        function updateDebugInfo(apiCall, status, xmlResponse, errors) {
+            document.getElementById('lastApiCall').textContent = apiCall;
+            document.getElementById('apiStatus').textContent = status;
+            document.getElementById('rawXml').textContent = xmlResponse;
+            document.getElementById('consoleErrors').textContent = errors;
         }
 
         async function updateData() {
@@ -589,15 +681,34 @@
         async function fetchWeatherData() {
             weatherData = [];
             
-            for (const feedUrl of countryFeeds) {
+            // Test with just a few feeds first to avoid rate limits
+            const testFeeds = [
+                'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-germany',
+                'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-france',
+                'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-italy',
+                'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-spain'
+            ];
+            
+            for (const feedUrl of testFeeds) {
                 try {
-                    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`);
+                    // Use CORS proxy to fetch the RSS feed
+                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`;
+                    console.log(`Fetching weather from: ${feedUrl}`);
+                    
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) {
+                        console.error(`Weather fetch failed for ${feedUrl}: ${response.status}`);
+                        continue;
+                    }
+                    
                     const xmlText = await response.text();
+                    console.log(`Weather XML length for ${feedUrl}: ${xmlText.length}`);
                     
                     const parser = new DOMParser();
                     const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
                     
                     const items = xmlDoc.querySelectorAll('item');
+                    console.log(`Found ${items.length} weather items in ${feedUrl}`);
                     
                     items.forEach(item => {
                         const title = item.querySelector('title')?.textContent || '';
@@ -646,6 +757,8 @@
                                         timestamp: new Date().toISOString(),
                                         emmaId: emmaId
                                     });
+                                    
+                                    console.log(`Added weather alert: ${title} - ${CONFIG.weatherTypes[awarenessType]} level ${level}`);
                                 }
                             }
                         }
@@ -655,6 +768,8 @@
                     console.error(`Error fetching weather data from ${feedUrl}:`, error);
                 }
             }
+            
+            console.log(`Total weather alerts found: ${weatherData.length}`);
         }
 
         function getCountryCodeFromName(countryName) {
@@ -690,31 +805,134 @@
             outageData = [];
             
             const now = new Date();
-            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
             
-            const startTime = formatDateTime(yesterday);
+            const startTime = formatDateTime(twoDaysAgo);
             const endTime = formatDateTime(now);
             
-            // Major European bidding zones
-            const biddingZones = [
+            // Test with just a few major zones first
+            const testZones = [
                 '10Y1001A1001A83F', // Germany
                 '10YFR-RTE------C', // France
                 '10YIT-GRTN-----B', // Italy
-                '10YES-REE------P', // Spain
-                '10YGB----------A', // Great Britain
-                '10YPL-AREA-----S', // Poland
-                '10YNL----------L', // Netherlands
-                '10YAT-APG------L', // Austria
-                '10YCZ-CEPS-----N', // Czech Republic
-                '10YCH-SWISSGRIDZ', // Switzerland
             ];
 
-            for (const zone of biddingZones) {
+            updateDebugInfo('Starting ENTSOE API tests...', 'Initializing', '', 'Testing multiple zones');
+
+            for (const zone of testZones) {
                 try {
                     const url = `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A80&processType=A16&biddingZone_Domain=${zone}&periodStart=${startTime}&periodEnd=${endTime}`;
                     
-                    const response = await fetch(url);
+                    console.log(`Testing ENTSOE API for zone ${zone}:`, url);
+                    updateDebugInfo(url, `Testing zone ${zone}...`, '', 'Making API call...');
+                    
+                    // Use CORS proxy for ENTSOE API
+                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+                    const response = await fetch(proxyUrl);
+                    
+                    console.log(`Response status for ${zone}: ${response.status}`);
+                    
+                    if (!response.ok) {
+                        console.error(`API call failed for ${zone}: ${response.status} ${response.statusText}`);
+                        updateDebugInfo(url, `HTTP Error: ${response.status} ${response.statusText}`, '', `Failed for zone ${zone}`);
+                        continue;
+                    }
+
                     const xmlText = await response.text();
+                    console.log(`XML response length for ${zone}: ${xmlText.length}`);
+                    console.log(`First 200 chars for ${zone}:`, xmlText.substring(0, 200));
+                    
+                    updateDebugInfo(url, `Success: ${response.status}`, xmlText.substring(0, 500), `Zone ${zone} responded`);
+
+                    if (xmlText.includes('<Reason>')) {
+                        console.log(`ENTSOE returned an error for ${zone}`);
+                        const parser = new DOMParser();
+                        const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                        const reasonCode = xmlDoc.querySelector('Reason code')?.textContent || 'Unknown';
+                        const reasonText = xmlDoc.querySelector('Reason text')?.textContent || 'Unknown error';
+                        console.log(`ENTSOE Error for ${zone}: ${reasonCode} - ${reasonText}`);
+                        updateDebugInfo(url, `ENTSOE Error: ${reasonCode}`, reasonText, `${zone}: ${reasonText}`);
+                        continue;
+                    }
+                    
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                    
+                    // Look for any XML elements to see what we actually got
+                    const allElements = xmlDoc.querySelectorAll('*');
+                    console.log(`Total XML elements found for ${zone}: ${allElements.length}`);
+                    
+                    // Try different possible element names for outages
+                    const possibleOutageElements = [
+                        'Unavailability_MarketDocument',
+                        'UnavailabilityMarketDocument', 
+                        'MarketDocument',
+                        'unavailability',
+                        'outage'
+                    ];
+                    
+                    let outagesFound = 0;
+                    for (const elementName of possibleOutageElements) {
+                        const elements = xmlDoc.querySelectorAll(elementName);
+                        if (elements.length > 0) {
+                            console.log(`Found ${elements.length} ${elementName} elements in ${zone}`);
+                            outagesFound += elements.length;
+                        }
+                    }
+                    
+                    if (outagesFound === 0) {
+                        console.log(`No outage elements found in ${zone}, but got valid XML response`);
+                        // This might mean no outages (which is actually good news!)
+                        continue;
+                    }
+                    
+                    // Parse outage data from XML (simplified for now)
+                    const outageElements = xmlDoc.querySelectorAll('Unavailability_MarketDocument, UnavailabilityMarketDocument, MarketDocument');
+                    
+                    outageElements.forEach((outageElement, index) => {
+                        console.log(`Processing outage ${index + 1} for ${zone}`);
+                        
+                        const mrid = outageElement.querySelector('mRID')?.textContent || `outage_${zone}_${index}`;
+                        const businessType = outageElement.querySelector('businessType')?.textContent || '';
+                        
+                        // Look for asset information
+                        const assetName = outageElement.querySelector('registeredResource\\.name, registeredResource name, asset name')?.textContent || `Asset in ${getBiddingZoneCountry(zone)}`;
+                        
+                        // Create outage record
+                        const countryCode = getBiddingZoneCountry(zone);
+                        const countryInfo = CONFIG.countryCodes[countryCode];
+                        
+                        if (countryInfo) {
+                            const outage = {
+                                id: mrid,
+                                location: `${assetName}, ${countryInfo.name}`,
+                                country: countryInfo.name,
+                                countryCode: countryCode,
+                                type: 'unplanned', // We'll determine this later
+                                capacity: Math.floor(Math.random() * 500) + 100, // Placeholder
+                                plantName: assetName,
+                                status: 'active',
+                                latitude: countryInfo.lat + (Math.random() - 0.5) * 2,
+                                longitude: countryInfo.lon + (Math.random() - 0.5) * 2,
+                                timestamp: new Date().toISOString(),
+                                zone: zone,
+                                businessType: businessType
+                            };
+                            
+                            outageData.push(outage);
+                            console.log(`Added outage: ${assetName} in ${countryInfo.name}`);
+                        }
+                    });
+                    
+                } catch (error) {
+                    console.error(`Error fetching outage data for zone ${zone}:`, error);
+                    updateDebugInfo('', `Network Error: ${error.message}`, '', `${zone}: ${error.message}`);
+                }
+            }
+            
+            console.log(`Total outages found: ${outageData.length}`);
+            updateDebugInfo('', `Completed. Found ${outageData.length} outages`, '', `Total: ${outageData.length} outages from ${testZones.length} zones`);
+        }
                     
                     if (xmlText.includes('<Reason>')) {
                         console.log(`No outage data for zone ${zone}`);
