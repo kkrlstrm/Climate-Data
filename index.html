@@ -275,6 +275,7 @@
             </div>
             <button class="btn" onclick="testWeatherData()">🌦️ Test Weather Data</button>
             <button class="btn" onclick="testOutageData()">⚡ Test ENTSOE API</button>
+            <button class="btn" onclick="testEntsoeParameters()">🧪 Test ENTSOE Parameters</button>
             <button class="btn" onclick="runFullTest()">🔄 Run Full Test</button>
             <button class="btn btn-danger" onclick="clearResults()">🗑️ Clear Results</button>
         </div>
@@ -536,9 +537,9 @@
             outageData = [];
             
             const now = new Date();
-            const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+            const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
             
-            const startTime = formatDateTime(twoDaysAgo);
+            const startTime = formatDateTime(sevenDaysAgo);
             const endTime = formatDateTime(now);
             
             const testZone = '10Y1001A1001A83F';
@@ -629,8 +630,85 @@
             updateStats();
         }
 
-        function formatDateTime(date) {
-            return date.toISOString().replace(/[-:]/g, '').split('.')[0].substring(0, 12);
+        // Add a function to test different ENTSOE parameters
+        async function testEntsoeParameters() {
+            const apiKey = document.getElementById('entsoeApiKey').value;
+            if (!apiKey) {
+                displayResults('API Key Error', 'Please enter your ENTSOE API key', 'error');
+                return;
+            }
+            
+            logMessage('Testing different ENTSOE parameters...');
+            displayResults('Parameter Test', 'Testing different ENTSOE API parameters...', 'info');
+            
+            const now = new Date();
+            const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            
+            const startTime = formatDateTime(oneWeekAgo);
+            const endTime = formatDateTime(now);
+            
+            // Test different document types that might work better
+            const testConfigs = [
+                {
+                    name: 'Generation Unavailability',
+                    documentType: 'A80',
+                    processType: 'A16'
+                },
+                {
+                    name: 'Transmission Unavailability', 
+                    documentType: 'A78',
+                    processType: 'A16'
+                },
+                {
+                    name: 'Load Forecast',
+                    documentType: 'A65',
+                    processType: 'A16'
+                }
+            ];
+            
+            const testZone = '10Y1001A1001A83F'; // Germany
+            
+            for (const config of testConfigs) {
+                try {
+                    const apiUrl = `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=${config.documentType}&processType=${config.processType}&biddingZone_Domain=${testZone}&periodStart=${startTime}&periodEnd=${endTime}`;
+                    
+                    logMessage(`Testing ${config.name}: ${config.documentType}`);
+                    displayResults(`Testing ${config.name}`, `Document type: ${config.documentType}`, 'info');
+                    
+                    const vercelProxy = `https://climate-data-inky.vercel.app/api/proxy?url=`;
+                    const proxyUrl = vercelProxy + encodeURIComponent(apiUrl);
+                    
+                    const response = await fetch(proxyUrl);
+                    const xmlText = await response.text();
+                    
+                    logMessage(`${config.name} response: ${response.status}, Length: ${xmlText.length}`);
+                    
+                    if (response.ok && !xmlText.includes('error')) {
+                        if (xmlText.includes('<Reason>')) {
+                            const parser = new DOMParser();
+                            const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                            const reasonText = xmlDoc.querySelector('Reason text')?.textContent || '';
+                            displayResults(`${config.name} Result`, `ENTSOE Error: ${reasonText}`, 'error');
+                        } else {
+                            displayResults(`${config.name} SUCCESS`, `✅ Got valid data! Length: ${xmlText.length}`, 'info');
+                            updateDebugInfo(apiUrl, `SUCCESS: ${response.status}`, xmlText.substring(0, 1000));
+                            
+                            // Try to parse and show what we got
+                            const parser = new DOMParser();
+                            const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                            const elements = xmlDoc.querySelectorAll('*');
+                            displayResults(`${config.name} Data`, `Found ${elements.length} XML elements`, 'info');
+                            
+                            return; // Success! Stop testing other configs
+                        }
+                    } else {
+                        displayResults(`${config.name} Failed`, `HTTP ${response.status}: ${xmlText}`, 'error');
+                    }
+                    
+                } catch (error) {
+                    displayResults(`${config.name} Error`, `Network error: ${error.message}`, 'error');
+                }
+            }
         }
 
         // Full test
