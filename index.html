@@ -68,282 +68,138 @@
   </div>
 
 <script>
-/* -------------------- CONFIG -------------------- */
-
-// Your deployed proxy that forwards the request (and suffers CORS for you)
-const PROXY = 'https://climate-data-inky.vercel.app/api/proxy?url=';
-
-// Countries to sample weather from (you can add back all 23 later)
-const WEATHER_FEEDS = [
-  'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-germany',
-  'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-france',
-  'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-italy',
-  'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-spain'
-];
-
-const ZONES = {
-  DE: '10Y1001A1001A83F', // Germany
-  FR: '10YFR-RTE------C', // France
-  IT: '10YIT-GRTN-----B', // Italy
-  ES: '10YES-REE------P', // Spain
-  GB: '10YGB----------A'  // Great Britain
-};
-
-/* -------------------- STATE -------------------- */
-let weatherData = [];
-let powerData = [];
-let correlations = [];
-
-/* -------------------- UTIL -------------------- */
-
-function log(msg, level='info') {
-  const el = document.getElementById('log');
-  const cls = level === 'error' ? 'err' : level === 'warn' ? 'warn' : level === 'success' ? 'ok' : 'info';
-  el.innerHTML += `<div class="${cls}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
-  el.scrollTop = el.scrollHeight;
-  console[level === 'error' ? 'error' : 'log'](msg);
-}
-
-function addResult(title, html, level='info') {
-  const wrap = document.createElement('div');
-  wrap.className = 'item';
-  if (level === 'error') wrap.style.borderColor = '#dc2626';
-  if (level === 'success') wrap.style.borderColor = '#22c55e';
-  wrap.innerHTML = `<strong>${title}</strong><br>${html}`;
-  document.getElementById('results').appendChild(wrap);
-}
-
-function updateStats() {
-  document.getElementById('weatherCount').textContent = weatherData.length;
-  document.getElementById('powerCount').textContent = powerData.length;
-  document.getElementById('corrCount').textContent = correlations.length;
-}
-
-function resetAll() {
-  document.getElementById('results').innerHTML = '';
-  document.getElementById('log').innerHTML = '';
-  weatherData = [];
-  powerData = [];
-  correlations = [];
-  updateStats();
-}
-
-// ENTSO‑E strict UTC format: YYYYMMDDHHMM
-function formatEntsoeTime(date) {
-  const y = date.getUTCFullYear();
-  const m = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const d = String(date.getUTCDate()).padStart(2, '0');
-  const h = String(date.getUTCHours()).padStart(2, '0');
-  const min = String(date.getUTCMinutes()).padStart(2, '0');
-  return `${y}${m}${d}${h}${min}`;
-}
-
-function encode(url) {
-  return PROXY + encodeURIComponent(url);
-}
-
-/* -------------------- TESTS -------------------- */
-
-async function testApiKey() {
-  const apiKey = getKey();
-  if (!apiKey) return;
-
-  const now = new Date();
-  const yesterday = new Date(now.getTime() - 24*60*60*1000);
-  const start = formatEntsoeTime(yesterday);
-  const end   = formatEntsoeTime(now);
-
-  const zone = ZONES.DE; // Germany
-
-  // Use Day-ahead prices (A44) — simplest "is my key valid" request
-  const url =
-    `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}` +
-    `&documentType=A44` +
-    `&in_Domain=${zone}&out_Domain=${zone}` +
-    `&periodStart=${start}&periodEnd=${end}`;
-
-  log('Testing API key with A44 (prices)...');
-
-  try {
-    const res = await fetch(encode(url));
-    const text = await res.text();
-    log(`HTTP ${res.status} • ${text.length} chars`);
-    if (!res.ok) {
-      addResult('API Key test failed', `HTTP ${res.status}<br><pre>${escapeHtml(text.slice(0,700))}</pre>`, 'error');
-      return;
-    }
-    if (text.includes('<Reason>')) {
-      addResult('API Key error (Reason)', `<pre>${escapeHtml(text.slice(0,700))}</pre>`, 'error');
-      return;
-    }
-    addResult('API Key OK', '✅ Prices (A44) returned successfully.', 'success');
-    log('API key valid ✔', 'success');
-  } catch (e) {
-    addResult('Network error', e.message, 'error');
-    log(e.message, 'error');
-  }
-}
-
-async function testWeather() {
-  log('Fetching MeteoAlarm severe weather feeds...');
-  let total = 0;
-  for (const feed of WEATHER_FEEDS) {
-    try {
-      const res = await fetch(encode(feed));
-      const xml = await res.text();
-      if (!res.ok) {
-        log(`Weather feed failed: ${feed} → HTTP ${res.status}`, 'error');
-        continue;
-      }
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(xml, 'text/xml');
-      const items = [...doc.querySelectorAll('item')];
-      let severe = 0;
-      items.forEach(item => {
-        const title = item.querySelector('title')?.textContent ?? '';
-        const desc = item.querySelector('description')?.textContent ?? '';
-        const levels = [...desc.matchAll(/level:(\d+)/g)].map(m => +m[1]);
-        const sev = levels.filter(v => v >= 3); // 3=severe, 4=extreme
-        if (sev.length) {
-          severe++;
-          const severity = sev.includes(4) ? 'extreme' : 'severe';
-          weatherData.push({ title, severity, country: countryFromFeed(feed) });
+<script>
+    // Your new working JavaScript goes here
+    
+    // Problem 1: Dynamic date generation
+    function generateEntsoeDates() {
+        const now = new Date();
+        const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+        
+        function toEntsoeFormat(date) {
+            const year = date.getUTCFullYear();
+            const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(date.getUTCDate()).padStart(2, '0');
+            const hour = String(date.getUTCHours()).padStart(2, '0');
+            const minute = String(date.getUTCMinutes()).padStart(2, '0');
+            
+            return `${year}${month}${day}${hour}${minute}`;
         }
-      });
-      total += severe;
-      addResult(`Weather – ${countryFromFeed(feed)}`, `${severe} severe/extreme alerts found`, severe ? 'success' : 'info');
-    } catch (e) {
-      log(`Weather error: ${e.message}`, 'error');
+        
+        return {
+            start: toEntsoeFormat(threeDaysAgo),
+            end: toEntsoeFormat(now)
+        };
     }
-  }
-  log(`Weather done. ${total} severe alerts.`);
-  updateStats();
-}
 
-async function testPowerData() {
-  const apiKey = getKey();
-  if (!apiKey) return;
-
-  log('Testing power data (several doc types)...');
-  const now = new Date();
-  const threeDaysAgo = new Date(now.getTime() - 3*24*60*60*1000);
-  const start = formatEntsoeTime(threeDaysAgo);
-  const end   = formatEntsoeTime(now);
-  const zone  = ZONES.DE;
-
-  const tests = [
-    {
-      name: 'Day-ahead Prices (A44)',
-      url: `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A44&in_Domain=${zone}&out_Domain=${zone}&periodStart=${start}&periodEnd=${end}`,
-      desc: 'Sanity check — usually always works'
-    },
-    {
-      name: 'Actual Total Load (A65, A16)',
-      url: `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A65&processType=A16&outBiddingZone_Domain=${zone}&periodStart=${start}&periodEnd=${end}`,
-      desc: 'Consumption — commonly accessible'
-    },
-    {
-      name: 'Generation by Type (A75, A16)',
-      url: `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A75&processType=A16&in_Domain=${zone}&periodStart=${start}&periodEnd=${end}`,
-      desc: 'Actual production by source'
-    },
-    // Unavailability (A80) often returns ZIPs; skip until you add unzip server-side.
-    // {
-    //   name: 'Unavailability / Outages (A80, A16)',
-    //   url: `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A80&processType=A16&biddingZone_Domain=${zone}&periodStart=${start}&periodEnd=${end}`,
-    //   desc: 'Potential outages; may need ZIP handling'
-    // }
-  ];
-
-  for (const t of tests) {
-    try {
-      log(`→ ${t.name}`);
-      const res = await fetch(encode(t.url));
-      const text = await res.text();
-      if (!res.ok) {
-        addResult(`${t.name} failed`, `HTTP ${res.status}<br><pre>${escapeHtml(text.slice(0,700))}</pre>`, 'error');
-        log(`${t.name} failed: HTTP ${res.status}`, 'error');
-        continue;
-      }
-      if (text.includes('<Reason>')) {
-        addResult(`${t.name} error (Reason)`, `<pre>${escapeHtml(text.slice(0,700))}</pre>`, 'error');
-        log(`${t.name} returned <Reason>`, 'error');
-        continue;
-      }
-      const seriesCount = (text.match(/<TimeSeries>/g) || []).length;
-      powerData.push({ name: t.name, seriesCount, desc: t.desc });
-      addResult(`${t.name} ok`, `✅ ${seriesCount} TimeSeries. ${t.desc}`, 'success');
-      log(`${t.name} → ${seriesCount} series`, 'success');
-      // If at least one passed, we can stop here for demo purposes
-      break;
-    } catch (e) {
-      addResult(`${t.name} network error`, e.message, 'error');
-      log(`${t.name} error: ${e.message}`, 'error');
+    // Problem 2: ZIP extraction
+    async function extractXmlFromZip(zipResponse) {
+        try {
+            const arrayBuffer = await zipResponse.arrayBuffer();
+            const bytes = new Uint8Array(arrayBuffer);
+            
+            if (bytes[0] !== 0x50 || bytes[1] !== 0x4B) {
+                const text = new TextDecoder('utf-8').decode(bytes);
+                return text.includes('<?xml') ? text : null;
+            }
+            
+            const text = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+            const xmlStart = text.indexOf('<?xml');
+            if (xmlStart === -1) return null;
+            
+            let xmlContent = text.substring(xmlStart);
+            
+            const possibleEndings = [
+                '</Unavailability_MarketDocument>',
+                '</MarketDocument>',
+                '</Document>'
+            ];
+            
+            for (const ending of possibleEndings) {
+                const endPos = xmlContent.indexOf(ending);
+                if (endPos !== -1) {
+                    xmlContent = xmlContent.substring(0, endPos + ending.length);
+                    break;
+                }
+            }
+            
+            xmlContent = xmlContent.replace(/[\x00-\x08\x0E-\x1F\x7F-\x9F]/g, '');
+            return xmlContent.trim();
+            
+        } catch (error) {
+            console.error('ZIP extraction failed:', error);
+            return null;
+        }
     }
-  }
 
-  updateStats();
-}
+    // Your existing functions (keep these)
+    function log(message, type = 'info') {
+        // ... existing log function
+    }
+    
+    function showResult(title, content, type = 'info') {
+        // ... existing showResult function  
+    }
 
-/* -------------------- CORRELATION (toy demo) -------------------- */
+    // Updated ENTSOE test function
+    async function testOutageData() {
+        log('Testing ENTSOE data with working proxy...');
+        
+        const dates = generateEntsoeDates();
+        log(`Fetching data from ${dates.start} to ${dates.end}`);
+        
+        // Use the working Cloudflare Worker (no API key needed!)
+        const url = `https://eu-grid.kai-1b8.workers.dev/?documentType=A80&processType=A16&biddingZone_Domain=10YFR-RTE------C&periodStart=${dates.start}&periodEnd=${dates.end}`;
+        
+        try {
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            log('Response received, extracting ZIP...');
+            const xmlContent = await extractXmlFromZip(response);
+            
+            if (xmlContent) {
+                log(`✅ Successfully extracted XML: ${xmlContent.length} characters`);
+                
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(xmlContent, 'text/xml');
+                
+                const outages = doc.querySelectorAll('Unavailability_MarketDocument');
+                log(`Found ${outages.length} outage documents`);
+                
+                if (outages.length > 0) {
+                    showResult('ENTSOE Success', `🎉 Found ${outages.length} power outages in France!`, 'success');
+                    
+                    // Parse first outage as example
+                    const firstOutage = outages[0];
+                    const mrid = firstOutage.querySelector('mRID')?.textContent || 'Unknown';
+                    const businessType = firstOutage.querySelector('businessType')?.textContent || 'Unknown';
+                    
+                    showResult('Sample Outage', `ID: ${mrid}, Type: ${businessType}`, 'info');
+                } else {
+                    showResult('No Outages', 'No power outages found (good news for the grid!)', 'info');
+                }
+                
+                return { success: true, count: outages.length };
+            } else {
+                showResult('ZIP Error', 'Could not extract XML from ZIP response', 'error');
+                return { success: false };
+            }
+            
+        } catch (error) {
+            log(`Error: ${error.message}`, 'error');
+            showResult('Network Error', error.message, 'error');
+            return { success: false };
+        }
+    }
 
-function runCorrelation() {
-  correlations = [];
-  if (!weatherData.length || !powerData.length) return;
+    // Keep all your other existing functions...
+    // (weather functions, UI functions, etc.)
 
-  correlations.push({
-    weather: weatherData[0],
-    power: powerData[0],
-    score: 0.65,
-    note: 'Temporal overlap; heuristic only'
-  });
-
-  addResult('Correlation', `1 potential correlation found (score 0.65)`, 'success');
-  updateStats();
-}
-
-/* -------------------- FLOW -------------------- */
-
-async function runFull() {
-  resetAll();
-  log('Starting full run...');
-  await testApiKey();
-  await testWeather();
-  await testPowerData();
-  runCorrelation();
-  addResult('Done', `Weather: ${weatherData.length}, Power datasets: ${powerData.length}, Correlations: ${correlations.length}`, 'success');
-}
-
-/* -------------------- HELPERS -------------------- */
-
-function getKey() {
-  const k = document.getElementById('apiKey').value.trim();
-  if (!k) {
-    addResult('Missing API key', 'Please paste your ENTSO‑E key first.', 'error');
-    return null;
-  }
-  localStorage.setItem('entsoeApiKey', k);
-  return k;
-}
-
-function countryFromFeed(feed) {
-  if (feed.includes('germany')) return 'Germany';
-  if (feed.includes('france'))  return 'France';
-  if (feed.includes('italy'))   return 'Italy';
-  if (feed.includes('spain'))   return 'Spain';
-  return 'Unknown';
-}
-
-function escapeHtml(s) {
-  return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-}
-
-/* -------------------- INIT -------------------- */
-document.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('entsoeApiKey');
-  if (saved) document.getElementById('apiKey').value = saved;
-  log('Ready. Paste your ENTSO‑E key and click "Test API key".');
-});
+</script>
 </script>
 </body>
 </html>
