@@ -15,8 +15,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #0a0a0a;
             color: #ffffff;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
         }
         
         .header {
@@ -54,79 +53,59 @@
             background: #4ade80;
         }
         
-        .main-container {
-            display: flex;
-            height: calc(100vh - 65px);
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
         
-        .map-container {
-            flex: 1;
-            position: relative;
+        .config-section {
             background: #1a1a1a;
-            border-right: 1px solid #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
         
-        .map {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
-            position: relative;
-            overflow: hidden;
+        .config-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #d1d5db;
         }
         
-        .sidebar {
-            width: 320px;
-            background: #111;
-            border-left: 1px solid #333;
-            display: flex;
-            flex-direction: column;
+        .input-group {
+            margin-bottom: 16px;
         }
         
-        .tabs {
-            display: flex;
-            background: #1a1a1a;
-            border-bottom: 1px solid #333;
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
+        .input-group label {
+            display: block;
             font-size: 14px;
-            font-weight: 500;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
+            color: #9ca3af;
+            margin-bottom: 8px;
         }
         
-        .tab.active {
-            background: #2563eb;
-            border-bottom-color: #3b82f6;
+        .input-group input {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 6px;
             color: white;
-        }
-        
-        .tab-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-        }
-        
-        .control-panel {
-            background: #1a1a1a;
-            padding: 16px;
-            border-bottom: 1px solid #333;
+            font-size: 14px;
         }
         
         .btn {
             background: #2563eb;
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 500;
-            transition: background 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
         }
         
         .btn:hover {
@@ -141,42 +120,51 @@
             background: #b91c1c;
         }
         
-        .config-section {
-            margin-bottom: 16px;
+        .results-section {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
         
-        .config-section h3 {
-            font-size: 14px;
+        .results-section h3 {
+            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 16px;
             color: #d1d5db;
         }
         
-        .input-group {
-            margin-bottom: 12px;
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         
-        .input-group label {
-            display: block;
-            font-size: 12px;
-            color: #9ca3af;
+        .stat {
+            background: #374151;
+            padding: 16px;
+            border-radius: 6px;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: 600;
+            color: #3b82f6;
             margin-bottom: 4px;
         }
         
-        .input-group input {
-            width: 100%;
-            padding: 8px;
-            background: #374151;
-            border: 1px solid #4b5563;
-            border-radius: 4px;
-            color: white;
-            font-size: 14px;
+        .stat-label {
+            font-size: 12px;
+            color: #9ca3af;
         }
         
         .alert-item {
-            background: #1f2937;
-            border: 1px solid #374151;
-            border-radius: 8px;
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 6px;
             padding: 12px;
             margin-bottom: 12px;
         }
@@ -222,130 +210,45 @@
             margin-top: 4px;
         }
         
-        .outage-item {
-            background: #1f2937;
-            border: 1px solid #374151;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 12px;
-        }
-        
-        .outage-type {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            display: inline-block;
-        }
-        
-        .type-weather {
-            background: #dc2626;
-            color: white;
-        }
-        
-        .type-emergency {
-            background: #f59e0b;
-            color: #000;
-        }
-        
-        .type-technical {
-            background: #6b7280;
-            color: white;
-        }
-        
-        .legend {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 12px;
-            border-radius: 8px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 4px;
-            font-size: 12px;
-        }
-        
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-        
         .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 200px;
             color: #9ca3af;
+            text-align: center;
+            padding: 20px;
         }
         
         .error {
             background: #1f2937;
             border: 1px solid #dc2626;
-            border-radius: 8px;
+            border-radius: 6px;
             padding: 12px;
             color: #fca5a5;
             font-size: 14px;
+            margin-bottom: 12px;
         }
         
-        .stats {
-            display: flex;
-            gap: 12px;
+        .debug-section {
+            background: #111;
+            border-radius: 6px;
+            padding: 12px;
             margin-bottom: 16px;
         }
         
-        .stat {
-            flex: 1;
-            background: #1f2937;
-            padding: 12px;
-            border-radius: 6px;
-            text-align: center;
+        .debug-section h4 {
+            color: #d1d5db;
+            font-size: 14px;
+            margin-bottom: 8px;
         }
         
-        .stat-number {
-            font-size: 20px;
-            font-weight: 600;
-            color: #3b82f6;
-        }
-        
-        .stat-label {
+        .debug-content {
+            font-family: 'Courier New', monospace;
             font-size: 11px;
             color: #9ca3af;
-            margin-top: 4px;
-        }
-        
-        .map-marker {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 2px solid white;
-            cursor: pointer;
-            transform: translate(-50%, -50%);
-            transition: all 0.2s;
-        }
-        
-        .map-marker:hover {
-            transform: translate(-50%, -50%) scale(1.2);
-        }
-        
-        .marker-weather {
-            background: #f59e0b;
-        }
-        
-        .marker-outage {
-            background: #dc2626;
-        }
-        
-        .marker-correlation {
-            background: #10b981;
+            background: #000;
+            padding: 8px;
+            border-radius: 4px;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -363,132 +266,69 @@
         </div>
     </div>
 
-    <div class="main-container">
-        <div class="map-container">
-            <div class="map" id="mapContainer">
-                <!-- Map markers will be dynamically added here -->
+    <div class="container">
+        <div class="config-section">
+            <h3>API Configuration</h3>
+            <div class="input-group">
+                <label>ENTSOE API Key</label>
+                <input type="password" id="entsoeApiKey" placeholder="Enter your ENTSOE API key">
             </div>
-            
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #dc2626;"></div>
-                    <span>Power Outages</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #f59e0b;"></div>
-                    <span>Weather Alerts</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #10b981;"></div>
-                    <span>Correlations</span>
-                </div>
-            </div>
+            <button class="btn" onclick="testWeatherData()">🌦️ Test Weather Data</button>
+            <button class="btn" onclick="testOutageData()">⚡ Test ENTSOE API</button>
+            <button class="btn" onclick="runFullTest()">🔄 Run Full Test</button>
+            <button class="btn btn-danger" onclick="clearResults()">🗑️ Clear Results</button>
         </div>
 
-        <div class="sidebar">
-            <div class="control-panel">
-                <div class="config-section">
-                    <h3>API Configuration</h3>
-                    <div class="input-group">
-                        <label>ENTSOE API Key</label>
-                        <input type="password" id="entsoeApiKey" placeholder="Enter your ENTSOE API key">
-                    </div>
-                    <button class="btn" onclick="updateData()">🔄 Refresh Data</button>
-                    <button class="btn btn-danger" onclick="clearData()">🗑️ Clear All</button>
+        <div class="results-section">
+            <h3>Test Results</h3>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number" id="weatherCount">0</div>
+                    <div class="stat-label">Weather Alerts</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="outageCount">0</div>
+                    <div class="stat-label">Power Outages</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="correlationCount">0</div>
+                    <div class="stat-label">Correlations</div>
                 </div>
             </div>
+            <div id="results"></div>
+        </div>
 
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('weather')">Weather</div>
-                <div class="tab" onclick="switchTab('outages')">Outages</div>
-                <div class="tab" onclick="switchTab('correlations')">Correlations</div>
-                <div class="tab" onclick="switchTab('debug')">Debug</div>
+        <div class="results-section">
+            <h3>Debug Information</h3>
+            
+            <div class="debug-section">
+                <h4>Last API Call</h4>
+                <div class="debug-content" id="lastApiCall">No API calls made yet</div>
             </div>
-
-            <div class="tab-content">
-                <div id="weatherTab">
-                    <div class="stats">
-                        <div class="stat">
-                            <div class="stat-number" id="weatherCount">0</div>
-                            <div class="stat-label">Severe Alerts</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-number" id="extremeCount">0</div>
-                            <div class="stat-label">Extreme</div>
-                        </div>
-                    </div>
-                    <div id="weatherList" class="loading">
-                        Loading weather data...
-                    </div>
-                </div>
-
-                <div id="outagesTab" style="display: none;">
-                    <div class="stats">
-                        <div class="stat">
-                            <div class="stat-number" id="outageCount">0</div>
-                            <div class="stat-label">Active Outages</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-number" id="weatherRelatedCount">0</div>
-                            <div class="stat-label">Weather-Related</div>
-                        </div>
-                    </div>
-                    <div id="outagesList" class="loading">
-                        Loading outage data...
-                    </div>
-                </div>
-
-                <div id="correlationsTab" style="display: none;">
-                    <div class="stats">
-                        <div class="stat">
-                            <div class="stat-number" id="correlationCount">0</div>
-                            <div class="stat-label">High Confidence</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-number" id="opportunityCount">0</div>
-                            <div class="stat-label">Sales Opportunities</div>
-                        </div>
-                    </div>
-                    <div id="correlationsList" class="loading">
-                        Analyzing correlations...
-                    </div>
-                </div>
-
-                <div id="debugTab" style="display: none;">
-                    <div class="config-section">
-                        <h3>API Debug Info</h3>
-                        <div class="alert-item">
-                            <div class="alert-details">
-                                <strong>Last ENTSOE API Call:</strong><br>
-                                <div id="lastApiCall" style="font-family: monospace; font-size: 11px; word-break: break-all;">None</div>
-                            </div>
-                        </div>
-                        <div class="alert-item">
-                            <div class="alert-details">
-                                <strong>API Response Status:</strong><br>
-                                <div id="apiStatus">No calls made</div>
-                            </div>
-                        </div>
-                        <div class="alert-item">
-                            <div class="alert-details">
-                                <strong>Raw XML Response (first 500 chars):</strong><br>
-                                <div id="rawXml" style="font-family: monospace; font-size: 11px; max-height: 150px; overflow-y: auto; background: #374151; padding: 8px; border-radius: 4px;">None</div>
-                            </div>
-                        </div>
-                        <div class="alert-item">
-                            <div class="alert-details">
-                                <strong>Console Errors:</strong><br>
-                                <div id="consoleErrors" style="font-family: monospace; font-size: 11px; color: #fca5a5;">None</div>
-                            </div>
-                        </div>
-                        <button class="btn" onclick="testSingleApiCall()">🧪 Test Single API Call</button>
-                    </div>
-                </div>
+            
+            <div class="debug-section">
+                <h4>API Response Status</h4>
+                <div class="debug-content" id="apiStatus">No responses yet</div>
+            </div>
+            
+            <div class="debug-section">
+                <h4>Raw XML Response (first 1000 chars)</h4>
+                <div class="debug-content" id="rawXml">No XML responses yet</div>
+            </div>
+            
+            <div class="debug-section">
+                <h4>Console Log</h4>
+                <div class="debug-content" id="consoleLog">No logs yet</div>
             </div>
         </div>
     </div>
 
     <script>
+        // Global variables
+        let weatherData = [];
+        let outageData = [];
+        let correlations = [];
+
         // Configuration
         const CONFIG = {
             weatherTypes: {
@@ -526,282 +366,173 @@
             }
         };
 
-        // Global state
-        let weatherData = [];
-        let outageData = [];
-        let correlations = [];
-
-        // RSS Feed URLs for individual countries
-        const countryFeeds = [
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-austria',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-belgium',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-croatia',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-czech-republic',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-denmark',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-estonia',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-finland',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-france',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-germany',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-greece',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-hungary',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-iceland',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-ireland',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-italy',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-luxembourg',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-netherlands',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-norway',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-poland',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-portugal',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-romania',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-spain',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-switzerland',
-            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-united-kingdom'
-        ];
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load saved API key
-            const savedApiKey = localStorage.getItem('entsoeApiKey');
-            if (savedApiKey) {
-                document.getElementById('entsoeApiKey').value = savedApiKey;
-            }
-            
-            // Start data collection
-            updateData();
-            
-            // Update every 5 minutes
-            setInterval(updateData, 5 * 60 * 1000);
-        });
-
-        function switchTab(tabName) {
-            // Update tab buttons
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Show/hide tab content
-            document.getElementById('weatherTab').style.display = 'none';
-            document.getElementById('outagesTab').style.display = 'none';
-            document.getElementById('correlationsTab').style.display = 'none';
-            document.getElementById('debugTab').style.display = 'none';
-            
-            document.getElementById(tabName + 'Tab').style.display = 'block';
+        // Utility functions
+        function logMessage(message) {
+            console.log(message);
+            const consoleLog = document.getElementById('consoleLog');
+            const timestamp = new Date().toLocaleTimeString();
+            consoleLog.innerHTML += `[${timestamp}] ${message}<br>`;
+            consoleLog.scrollTop = consoleLog.scrollHeight;
         }
 
-        async function testSingleApiCall() {
-            const apiKey = document.getElementById('entsoeApiKey').value;
-            if (!apiKey) {
-                updateDebugInfo('No API key provided', 'Error', 'N/A', 'Please enter API key');
-                return;
-            }
-
-            const now = new Date();
-            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-            const startTime = formatDateTime(yesterday);
-            const endTime = formatDateTime(now);
-            
-            // Test with Germany (largest zone, most likely to have data)
-            const testZone = '10Y1001A1001A83F';
-            const url = `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A80&processType=A16&biddingZone_Domain=${testZone}&periodStart=${startTime}&periodEnd=${endTime}`;
-            
-            updateDebugInfo(url, 'Testing...', 'N/A', 'Making API call...');
-            
-            try {
-                console.log('Testing ENTSOE API call:', url);
-                const response = await fetch(url);
-                const xmlText = await response.text();
-                
-                console.log('Response status:', response.status);
-                console.log('Response text length:', xmlText.length);
-                console.log('First 500 chars:', xmlText.substring(0, 500));
-                
-                updateDebugInfo(
-                    url,
-                    `Status: ${response.status} ${response.statusText}`,
-                    xmlText.substring(0, 500),
-                    response.ok ? 'Success' : 'HTTP Error'
-                );
-                
-                if (xmlText.includes('<Reason>')) {
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-                    const reason = xmlDoc.querySelector('Reason text')?.textContent || 'Unknown error';
-                    updateDebugInfo(url, `ENTSOE Error: ${reason}`, xmlText.substring(0, 500), 'ENTSOE API Error');
-                }
-                
-            } catch (error) {
-                console.error('API call failed:', error);
-                updateDebugInfo(
-                    url,
-                    `Fetch Error: ${error.message}`,
-                    'N/A',
-                    `Network/CORS Error: ${error.message}`
-                );
-            }
-        }
-
-        function updateDebugInfo(apiCall, status, xmlResponse, errors) {
+        function updateDebugInfo(apiCall, status, xmlResponse) {
             document.getElementById('lastApiCall').textContent = apiCall;
             document.getElementById('apiStatus').textContent = status;
             document.getElementById('rawXml').textContent = xmlResponse;
-            document.getElementById('consoleErrors').textContent = errors;
         }
 
-        async function updateData() {
-            const apiKey = document.getElementById('entsoeApiKey').value;
-            if (!apiKey) {
-                showError('Please enter your ENTSOE API key');
-                return;
-            }
+        function displayResults(title, data, type = 'info') {
+            const results = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = type === 'error' ? 'error' : 'alert-item';
             
-            // Save API key
-            localStorage.setItem('entsoeApiKey', apiKey);
+            resultDiv.innerHTML = `
+                <div class="alert-header">
+                    <div class="alert-location">${title}</div>
+                    <div class="alert-time">${new Date().toLocaleTimeString()}</div>
+                </div>
+                <div class="alert-details">${data}</div>
+            `;
             
-            try {
-                // Fetch weather data from all country feeds
-                await fetchWeatherData();
-                
-                // Fetch power outage data
-                await fetchOutageData(apiKey);
-                
-                // Calculate correlations
-                calculateCorrelations();
-                
-                // Update UI
-                updateUI();
-                
-                // Update timestamp
-                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
-                
-            } catch (error) {
-                console.error('Error updating data:', error);
-                showError('Failed to update data: ' + error.message);
-            }
+            results.appendChild(resultDiv);
         }
 
-        async function fetchWeatherData() {
+        function updateStats() {
+            document.getElementById('weatherCount').textContent = weatherData.length;
+            document.getElementById('outageCount').textContent = outageData.length;
+            document.getElementById('correlationCount').textContent = correlations.length;
+        }
+
+        // Weather data testing with YOUR Vercel proxy
+        async function testWeatherData() {
+            logMessage('Starting weather data test with Vercel proxy...');
+            displayResults('Weather Test', 'Testing weather feeds with your Vercel proxy...', 'info');
+            
             weatherData = [];
             
-            // Test with just a few feeds first to avoid rate limits
+            const testUrl = 'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-germany';
+            
+            try {
+                // Use YOUR Vercel proxy (replace with your actual Vercel URL)
+                const vercelProxy = `${window.location.origin}/api/proxy?url=`;
+                const proxyUrl = vercelProxy + encodeURIComponent(testUrl);
+                
+                logMessage(`Using Vercel proxy: ${vercelProxy}`);
+                displayResults('Vercel Proxy Test', `Testing your proxy: ${window.location.origin}/api/proxy`, 'info');
+                
+                updateDebugInfo(proxyUrl, 'Testing your Vercel proxy...', '');
+                
+                const response = await fetch(proxyUrl);
+                const xmlText = await response.text();
+                
+                logMessage(`Vercel proxy response: ${response.status}, Length: ${xmlText.length}`);
+                updateDebugInfo(proxyUrl, `${response.status} - ${xmlText.length} chars`, xmlText.substring(0, 1000));
+                
+                if (response.ok && xmlText.length > 100) {
+                    displayResults('Vercel Proxy Success', `Your proxy works! Response length: ${xmlText.length}`, 'info');
+                    
+                    // Try to parse the XML
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                    const items = xmlDoc.querySelectorAll('item');
+                    
+                    logMessage(`Found ${items.length} items in weather feed`);
+                    displayResults('XML Parse Success', `Found ${items.length} weather items`, 'info');
+                    
+                    // Parse weather data
+                    await fetchWeatherWithVercelProxy(vercelProxy);
+                    
+                } else {
+                    displayResults('Vercel Proxy Failed', `Status: ${response.status}, Response: ${xmlText.substring(0, 200)}`, 'error');
+                    
+                    // If response contains error info, show it
+                    if (xmlText.includes('error')) {
+                        try {
+                            const errorData = JSON.parse(xmlText);
+                            displayResults('Proxy Error Details', errorData.message || errorData.error, 'error');
+                        } catch (e) {
+                            displayResults('Proxy Error Details', xmlText, 'error');
+                        }
+                    }
+                }
+                
+            } catch (error) {
+                logMessage(`Vercel proxy error: ${error.message}`);
+                displayResults('Vercel Proxy Error', `Network error: ${error.message}`, 'error');
+                
+                displayResults('Troubleshooting', `
+                    If your proxy isn't working:
+                    1. Check that api/proxy.js was deployed to Vercel
+                    2. Visit ${window.location.origin}/api/proxy directly to test
+                    3. Check Vercel deployment logs for errors
+                `, 'error');
+            }
+            
+            updateStats();
+        }
+
+        async function fetchWeatherWithVercelProxy(vercelProxy) {
             const testFeeds = [
                 'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-germany',
-                'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-france',
-                'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-italy',
-                'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-spain'
+                'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-italy'
             ];
             
             for (const feedUrl of testFeeds) {
                 try {
-                    // Use CORS proxy to fetch the RSS feed
-                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`;
-                    console.log(`Fetching weather from: ${feedUrl}`);
-                    
+                    const proxyUrl = vercelProxy + encodeURIComponent(feedUrl);
                     const response = await fetch(proxyUrl);
-                    if (!response.ok) {
-                        console.error(`Weather fetch failed for ${feedUrl}: ${response.status}`);
-                        continue;
-                    }
-                    
                     const xmlText = await response.text();
-                    console.log(`Weather XML length for ${feedUrl}: ${xmlText.length}`);
                     
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-                    
-                    const items = xmlDoc.querySelectorAll('item');
-                    console.log(`Found ${items.length} weather items in ${feedUrl}`);
-                    
-                    items.forEach(item => {
-                        const title = item.querySelector('title')?.textContent || '';
-                        const description = item.querySelector('description')?.textContent || '';
-                        const link = item.querySelector('link')?.textContent || '';
+                    if (response.ok) {
+                        const parser = new DOMParser();
+                        const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                        const items = xmlDoc.querySelectorAll('item');
                         
-                        // Parse awareness types and levels
-                        const awarenessRegex = /awt:(\d+)\s+level:(\d+)/g;
-                        let match;
-                        
-                        while ((match = awarenessRegex.exec(description)) !== null) {
-                            const awarenessType = parseInt(match[1]);
-                            const level = parseInt(match[2]);
+                        let alertsFound = 0;
+                        items.forEach(item => {
+                            const title = item.querySelector('title')?.textContent || '';
+                            const description = item.querySelector('description')?.textContent || '';
                             
-                            // Filter for relevant types and severe+ levels only
-                            if (CONFIG.weatherTypes[awarenessType] && level >= 3) {
-                                // Extract EMMA_ID if available
-                                const emmaMatch = link.match(/EMMA_ID:([A-Z0-9]+)/);
-                                const emmaId = emmaMatch ? emmaMatch[1] : null;
+                            const awarenessRegex = /awt:(\d+)\s+level:(\d+)/g;
+                            let match;
+                            
+                            while ((match = awarenessRegex.exec(description)) !== null) {
+                                const awarenessType = parseInt(match[1]);
+                                const level = parseInt(match[2]);
                                 
-                                // Get country code from EMMA_ID or feed URL
-                                let countryCode = '';
-                                if (emmaId) {
-                                    countryCode = emmaId.substring(0, 2);
-                                } else {
-                                    // Extract from feed URL
-                                    const urlMatch = feedUrl.match(/rss-([a-z-]+)$/);
-                                    if (urlMatch) {
-                                        const country = urlMatch[1];
-                                        countryCode = getCountryCodeFromName(country);
-                                    }
-                                }
-                                
-                                const countryInfo = CONFIG.countryCodes[countryCode];
-                                if (countryInfo) {
+                                if (CONFIG.weatherTypes[awarenessType] && level >= 3) {
                                     weatherData.push({
-                                        id: `weather_${Date.now()}_${Math.random()}`,
                                         location: title,
-                                        country: countryInfo.name,
-                                        countryCode: countryCode,
                                         type: CONFIG.weatherTypes[awarenessType],
                                         severity: level === 4 ? 'extreme' : 'severe',
-                                        description: description,
-                                        latitude: countryInfo.lat + (Math.random() - 0.5) * 2, // Add some variance
-                                        longitude: countryInfo.lon + (Math.random() - 0.5) * 2,
-                                        timestamp: new Date().toISOString(),
-                                        emmaId: emmaId
+                                        level: level,
+                                        description: description.substring(0, 200) + '...'
                                     });
-                                    
-                                    console.log(`Added weather alert: ${title} - ${CONFIG.weatherTypes[awarenessType]} level ${level}`);
+                                    alertsFound++;
                                 }
                             }
-                        }
-                    });
+                        });
+                        
+                        displayResults('Weather Success', `Found ${alertsFound} severe weather alerts in ${feedUrl.split('/').pop()}`, 'info');
+                    }
                     
                 } catch (error) {
-                    console.error(`Error fetching weather data from ${feedUrl}:`, error);
+                    displayResults('Weather Error', `Error processing ${feedUrl}: ${error.message}`, 'error');
                 }
             }
+        }
+
+        // ENTSOE API testing with YOUR Vercel proxy
+        async function testOutageData() {
+            const apiKey = document.getElementById('entsoeApiKey').value;
+            if (!apiKey) {
+                displayResults('API Key Error', 'Please enter your ENTSOE API key', 'error');
+                return;
+            }
             
-            console.log(`Total weather alerts found: ${weatherData.length}`);
-        }
-
-        function getCountryCodeFromName(countryName) {
-            const mapping = {
-                'austria': 'AT',
-                'belgium': 'BE',
-                'croatia': 'HR',
-                'czech-republic': 'CZ',
-                'denmark': 'DK',
-                'estonia': 'EE',
-                'finland': 'FI',
-                'france': 'FR',
-                'germany': 'DE',
-                'greece': 'GR',
-                'hungary': 'HU',
-                'iceland': 'IS',
-                'ireland': 'IE',
-                'italy': 'IT',
-                'luxembourg': 'LU',
-                'netherlands': 'NL',
-                'norway': 'NO',
-                'poland': 'PL',
-                'portugal': 'PT',
-                'romania': 'RO',
-                'spain': 'ES',
-                'switzerland': 'CH',
-                'united-kingdom': 'GB'
-            };
-            return mapping[countryName] || '';
-        }
-
-        async function fetchOutageData(apiKey) {
+            logMessage('Starting ENTSOE API test with Vercel proxy...');
+            displayResults('ENTSOE Test', 'Testing ENTSOE API with your Vercel proxy...', 'info');
+            
             outageData = [];
             
             const now = new Date();
@@ -810,491 +541,143 @@
             const startTime = formatDateTime(twoDaysAgo);
             const endTime = formatDateTime(now);
             
-            // Test with just a few major zones first
-            const testZones = [
-                '10Y1001A1001A83F', // Germany
-                '10YFR-RTE------C', // France
-                '10YIT-GRTN-----B', // Italy
-            ];
-
-            updateDebugInfo('Starting ENTSOE API tests...', 'Initializing', '', 'Testing multiple zones');
-
-            for (const zone of testZones) {
-                try {
-                    const url = `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A80&processType=A16&biddingZone_Domain=${zone}&periodStart=${startTime}&periodEnd=${endTime}`;
+            const testZone = '10Y1001A1001A83F';
+            const apiUrl = `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A80&processType=A16&biddingZone_Domain=${testZone}&periodStart=${startTime}&periodEnd=${endTime}`;
+            
+            logMessage(`Testing ENTSOE API with zone: ${testZone}`);
+            logMessage(`API URL: ${apiUrl}`);
+            
+            try {
+                // Use YOUR Vercel proxy
+                const vercelProxy = `${window.location.origin}/api/proxy?url=`;
+                const proxyUrl = vercelProxy + encodeURIComponent(apiUrl);
+                
+                logMessage(`Using Vercel proxy for ENTSOE: ${vercelProxy}`);
+                displayResults('ENTSOE Vercel Test', `Testing ENTSOE with your proxy`, 'info');
+                
+                updateDebugInfo(apiUrl, 'Testing ENTSOE with your Vercel proxy...', '');
+                
+                const response = await fetch(proxyUrl);
+                const xmlText = await response.text();
+                
+                logMessage(`ENTSOE Vercel response: ${response.status}, Length: ${xmlText.length}`);
+                updateDebugInfo(apiUrl, `${response.status} - ${xmlText.length} chars`, xmlText.substring(0, 1000));
+                
+                if (response.ok && xmlText.length > 50) {
+                    displayResults('ENTSOE Proxy Success', `Your proxy accessed ENTSOE! Length: ${xmlText.length}`, 'info');
                     
-                    console.log(`Testing ENTSOE API for zone ${zone}:`, url);
-                    updateDebugInfo(url, `Testing zone ${zone}...`, '', 'Making API call...');
-                    
-                    // Use CORS proxy for ENTSOE API
-                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-                    const response = await fetch(proxyUrl);
-                    
-                    console.log(`Response status for ${zone}: ${response.status}`);
-                    
-                    if (!response.ok) {
-                        console.error(`API call failed for ${zone}: ${response.status} ${response.statusText}`);
-                        updateDebugInfo(url, `HTTP Error: ${response.status} ${response.statusText}`, '', `Failed for zone ${zone}`);
-                        continue;
-                    }
-
-                    const xmlText = await response.text();
-                    console.log(`XML response length for ${zone}: ${xmlText.length}`);
-                    console.log(`First 200 chars for ${zone}:`, xmlText.substring(0, 200));
-                    
-                    updateDebugInfo(url, `Success: ${response.status}`, xmlText.substring(0, 500), `Zone ${zone} responded`);
-
+                    // Check for ENTSOE errors
                     if (xmlText.includes('<Reason>')) {
-                        console.log(`ENTSOE returned an error for ${zone}`);
                         const parser = new DOMParser();
                         const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-                        const reasonCode = xmlDoc.querySelector('Reason code')?.textContent || 'Unknown';
-                        const reasonText = xmlDoc.querySelector('Reason text')?.textContent || 'Unknown error';
-                        console.log(`ENTSOE Error for ${zone}: ${reasonCode} - ${reasonText}`);
-                        updateDebugInfo(url, `ENTSOE Error: ${reasonCode}`, reasonText, `${zone}: ${reasonText}`);
-                        continue;
-                    }
-                    
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-                    
-                    // Look for any XML elements to see what we actually got
-                    const allElements = xmlDoc.querySelectorAll('*');
-                    console.log(`Total XML elements found for ${zone}: ${allElements.length}`);
-                    
-                    // Try different possible element names for outages
-                    const possibleOutageElements = [
-                        'Unavailability_MarketDocument',
-                        'UnavailabilityMarketDocument', 
-                        'MarketDocument',
-                        'unavailability',
-                        'outage'
-                    ];
-                    
-                    let outagesFound = 0;
-                    for (const elementName of possibleOutageElements) {
-                        const elements = xmlDoc.querySelectorAll(elementName);
-                        if (elements.length > 0) {
-                            console.log(`Found ${elements.length} ${elementName} elements in ${zone}`);
-                            outagesFound += elements.length;
+                        const reasonCode = xmlDoc.querySelector('Reason code')?.textContent || '';
+                        const reasonText = xmlDoc.querySelector('Reason text')?.textContent || '';
+                        
+                        displayResults('ENTSOE API Error', `Code: ${reasonCode}, Message: ${reasonText}`, 'error');
+                        logMessage(`ENTSOE API returned error: ${reasonCode} - ${reasonText}`);
+                        
+                        if (reasonCode === '999') {
+                            displayResults('API Key Issue', 'Error 999 usually means invalid API key or wrong parameters. Check your ENTSOE API key!', 'error');
+                        } else if (reasonText.includes('No matching data')) {
+                            displayResults('No Data Found', 'No outages found for this time period (this is actually good news!)', 'info');
                         }
-                    }
-                    
-                    if (outagesFound === 0) {
-                        console.log(`No outage elements found in ${zone}, but got valid XML response`);
-                        // This might mean no outages (which is actually good news!)
-                        continue;
-                    }
-                    
-                    // Parse outage data from XML (simplified for now)
-                    const outageElements = xmlDoc.querySelectorAll('Unavailability_MarketDocument, UnavailabilityMarketDocument, MarketDocument');
-                    
-                    outageElements.forEach((outageElement, index) => {
-                        console.log(`Processing outage ${index + 1} for ${zone}`);
+                    } else {
+                        // Parse successful response
+                        const parser = new DOMParser();
+                        const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                        const outageElements = xmlDoc.querySelectorAll('*');
                         
-                        const mrid = outageElement.querySelector('mRID')?.textContent || `outage_${zone}_${index}`;
-                        const businessType = outageElement.querySelector('businessType')?.textContent || '';
+                        displayResults('ENTSOE Success', `🎉 ENTSOE API working! XML parsed successfully. Found ${outageElements.length} XML elements`, 'info');
                         
-                        // Look for asset information
-                        const assetName = outageElement.querySelector('registeredResource\\.name, registeredResource name, asset name')?.textContent || `Asset in ${getBiddingZoneCountry(zone)}`;
-                        
-                        // Create outage record
-                        const countryCode = getBiddingZoneCountry(zone);
-                        const countryInfo = CONFIG.countryCodes[countryCode];
-                        
-                        if (countryInfo) {
-                            const outage = {
-                                id: mrid,
-                                location: `${assetName}, ${countryInfo.name}`,
-                                country: countryInfo.name,
-                                countryCode: countryCode,
-                                type: 'unplanned', // We'll determine this later
-                                capacity: Math.floor(Math.random() * 500) + 100, // Placeholder
-                                plantName: assetName,
-                                status: 'active',
-                                latitude: countryInfo.lat + (Math.random() - 0.5) * 2,
-                                longitude: countryInfo.lon + (Math.random() - 0.5) * 2,
-                                timestamp: new Date().toISOString(),
-                                zone: zone,
-                                businessType: businessType
-                            };
+                        // Look for actual outage data
+                        const unavailabilityDocs = xmlDoc.querySelectorAll('Unavailability_MarketDocument, UnavailabilityMarketDocument');
+                        if (unavailabilityDocs.length > 0) {
+                            displayResults('Outages Found', `Found ${unavailabilityDocs.length} outage documents!`, 'info');
                             
-                            outageData.push(outage);
-                            console.log(`Added outage: ${assetName} in ${countryInfo.name}`);
-                        }
-                    });
-                    
-                } catch (error) {
-                    console.error(`Error fetching outage data for zone ${zone}:`, error);
-                    updateDebugInfo('', `Network Error: ${error.message}`, '', `${zone}: ${error.message}`);
-                }
-            }
-            
-            console.log(`Total outages found: ${outageData.length}`);
-            updateDebugInfo('', `Completed. Found ${outageData.length} outages`, '', `Total: ${outageData.length} outages from ${testZones.length} zones`);
-        }
-                    
-                    if (xmlText.includes('<Reason>')) {
-                        console.log(`No outage data for zone ${zone}`);
-                        continue;
-                    }
-                    
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-                    
-                    // Parse outage data from XML
-                    const outages = xmlDoc.querySelectorAll('Unavailability_MarketDocument');
-                    
-                    outages.forEach(outage => {
-                        const mrid = outage.querySelector('mRID')?.textContent || '';
-                        const businessType = outage.querySelector('businessType')?.textContent || '';
-                        
-                        // Only include unplanned outages
-                        if (businessType === 'A53') { // Unplanned outage
-                            const assetName = outage.querySelector('registeredResource\\.name')?.textContent || 'Unknown Asset';
-                            const capacity = outage.querySelector('quantity_Measure_Unit\\.name')?.textContent || '0';
-                            
-                            // Determine if weather-related (this is a simplified heuristic)
-                            const isWeatherRelated = Math.random() < 0.3; // 30% chance for demo
-                            const outageType = isWeatherRelated ? 'weather_related' : (Math.random() < 0.5 ? 'emergency' : 'technical_failure');
-                            
-                            // Get country info from bidding zone
-                            const countryCode = getBiddingZoneCountry(zone);
-                            const countryInfo = CONFIG.countryCodes[countryCode];
-                            
-                            if (countryInfo) {
+                            unavailabilityDocs.forEach((doc, index) => {
+                                const mrid = doc.querySelector('mRID')?.textContent || `outage_${index}`;
                                 outageData.push({
                                     id: mrid,
-                                    location: `${assetName}, ${countryInfo.name}`,
-                                    country: countryInfo.name,
-                                    countryCode: countryCode,
-                                    type: outageType,
-                                    capacity: parseInt(capacity) || 0,
-                                    plantName: assetName,
-                                    status: 'active',
-                                    latitude: countryInfo.lat + (Math.random() - 0.5) * 2,
-                                    longitude: countryInfo.lon + (Math.random() - 0.5) * 2,
-                                    timestamp: new Date().toISOString()
+                                    zone: testZone,
+                                    country: 'Germany'
                                 });
-                            }
+                            });
+                        } else {
+                            displayResults('No Outages', 'No outages found in the response (good news for the grid!)', 'info');
                         }
-                    });
+                    }
                     
-                } catch (error) {
-                    console.error(`Error fetching outage data for zone ${zone}:`, error);
+                } else {
+                    displayResults('ENTSOE Proxy Failed', `Status: ${response.status}, Response too short: ${xmlText.length} chars`, 'error');
+                    
+                    // Show error details if available
+                    if (xmlText.includes('error')) {
+                        try {
+                            const errorData = JSON.parse(xmlText);
+                            displayResults('ENTSOE Error Details', errorData.message || errorData.error, 'error');
+                        } catch (e) {
+                            displayResults('ENTSOE Response', xmlText.substring(0, 500), 'error');
+                        }
+                    }
                 }
+                
+            } catch (error) {
+                logMessage(`ENTSOE Vercel error: ${error.message}`);
+                displayResults('ENTSOE Proxy Error', `Network error: ${error.message}`, 'error');
             }
-        }
-
-        function getBiddingZoneCountry(zone) {
-            const mapping = {
-                '10Y1001A1001A83F': 'DE',
-                '10YFR-RTE------C': 'FR',
-                '10YIT-GRTN-----B': 'IT',
-                '10YES-REE------P': 'ES',
-                '10YGB----------A': 'GB',
-                '10YPL-AREA-----S': 'PL',
-                '10YNL----------L': 'NL',
-                '10YAT-APG------L': 'AT',
-                '10YCZ-CEPS-----N': 'CZ',
-                '10YCH-SWISSGRIDZ': 'CH'
-            };
-            return mapping[zone] || 'Unknown';
+            
+            updateStats();
         }
 
         function formatDateTime(date) {
             return date.toISOString().replace(/[-:]/g, '').split('.')[0].substring(0, 12);
         }
 
-        function calculateCorrelations() {
+        // Full test
+        async function runFullTest() {
+            clearResults();
+            await testWeatherData();
+            await testOutageData();
+            
+            // Simple correlation test
             correlations = [];
-            
-            weatherData.forEach(weather => {
-                outageData.forEach(outage => {
-                    const distance = calculateDistance(
-                        weather.latitude, weather.longitude,
-                        outage.latitude, outage.longitude
-                    );
-                    
-                    // Correlation within 100km
-                    if (distance <= 100) {
-                        const timeDiff = Math.abs(new Date(weather.timestamp) - new Date(outage.timestamp));
-                        const hoursDiff = timeDiff / (1000 * 60 * 60);
-                        
-                        // Correlation within 48 hours
-                        if (hoursDiff <= 48) {
-                            let score = 0.5; // Base score
-                            
-                            // Higher score for closer proximity
-                            if (distance <= 25) score += 0.3;
-                            else if (distance <= 50) score += 0.2;
-                            else score += 0.1;
-                            
-                            // Higher score for closer timing
-                            if (hoursDiff <= 6) score += 0.3;
-                            else if (hoursDiff <= 12) score += 0.2;
-                            else if (hoursDiff <= 24) score += 0.1;
-                            
-                            // Weather-related outages get automatic high score
-                            if (outage.type === 'weather_related') {
-                                score = 0.95;
-                            }
-                            
-                            // Weather type matching
-                            if (weather.type === 'Wind' && outage.type !== 'technical_failure') score += 0.2;
-                            if (weather.type === 'Extreme Heat' && outage.capacity > 500) score += 0.2;
-                            if (weather.severity === 'extreme') score += 0.1;
-                            
-                            // Cap at 1.0
-                            score = Math.min(score, 1.0);
-                            
-                            correlations.push({
-                                id: `corr_${weather.id}_${outage.id}`,
-                                weatherId: weather.id,
-                                outageId: outage.id,
-                                weather: weather,
-                                outage: outage,
-                                distance: distance,
-                                score: score,
-                                confidence: score >= 0.7 ? 'high' : score >= 0.4 ? 'medium' : 'low',
-                                analysis: generateAnalysis(weather, outage, distance, hoursDiff, score)
-                            });
-                        }
-                    }
+            if (weatherData.length > 0 && outageData.length > 0) {
+                correlations.push({
+                    weather: weatherData[0],
+                    outage: outageData[0],
+                    score: 0.75
                 });
-            });
-            
-            // Sort by score descending
-            correlations.sort((a, b) => b.score - a.score);
-        }
-
-        function generateAnalysis(weather, outage, distance, hoursDiff, score) {
-            let analysis = `${weather.type} alert in ${weather.location} correlates with power outage at ${outage.plantName}. `;
-            analysis += `Distance: ${distance.toFixed(1)}km, Time difference: ${hoursDiff.toFixed(1)} hours. `;
-            
-            if (outage.type === 'weather_related') {
-                analysis += "Grid operator confirmed weather-related cause. ";
+                displayResults('Correlation Found', `Potential correlation between ${weatherData[0].type} and grid outage`, 'info');
             }
             
-            if (score >= 0.7) {
-                analysis += "High confidence correlation - strong sales opportunity.";
-            } else if (score >= 0.4) {
-                analysis += "Moderate confidence - worth investigating.";
-            } else {
-                analysis += "Low confidence - weak correlation.";
-            }
-            
-            return analysis;
+            updateStats();
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
         }
 
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Earth's radius in km
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                    Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
-        }
-
-        function updateUI() {
-            updateWeatherTab();
-            updateOutagesTab(); 
-            updateCorrelationsTab();
-            updateMap();
-        }
-
-        function updateWeatherTab() {
-            const severeCount = weatherData.filter(w => w.severity === 'severe').length;
-            const extremeCount = weatherData.filter(w => w.severity === 'extreme').length;
-            
-            document.getElementById('weatherCount').textContent = weatherData.length;
-            document.getElementById('extremeCount').textContent = extremeCount;
-            
-            const weatherList = document.getElementById('weatherList');
-            
-            if (weatherData.length === 0) {
-                weatherList.innerHTML = '<div class="error">No severe weather alerts found</div>';
-                return;
-            }
-            
-            weatherList.innerHTML = weatherData.map(weather => `
-                <div class="alert-item">
-                    <div class="alert-header">
-                        <div class="alert-location">${weather.location}</div>
-                        <div class="alert-severity severity-${weather.severity}">${weather.severity}</div>
-                    </div>
-                    <div class="alert-details">
-                        <strong>${weather.type}</strong> - ${weather.country}
-                    </div>
-                    <div class="alert-time">${formatTime(weather.timestamp)}</div>
-                </div>
-            `).join('');
-        }
-
-        function updateOutagesTab() {
-            const weatherRelatedCount = outageData.filter(o => o.type === 'weather_related').length;
-            
-            document.getElementById('outageCount').textContent = outageData.length;
-            document.getElementById('weatherRelatedCount').textContent = weatherRelatedCount;
-            
-            const outagesList = document.getElementById('outagesList');
-            
-            if (outageData.length === 0) {
-                outagesList.innerHTML = '<div class="error">No active outages found</div>';
-                return;
-            }
-            
-            outagesList.innerHTML = outageData.map(outage => `
-                <div class="outage-item">
-                    <div class="outage-type type-${outage.type.replace('_', '-')}">${outage.type.replace('_', ' ')}</div>
-                    <div class="alert-location">${outage.location}</div>
-                    <div class="alert-details">
-                        Plant: ${outage.plantName}<br>
-                        Capacity: ${outage.capacity} MW
-                    </div>
-                    <div class="alert-time">${formatTime(outage.timestamp)}</div>
-                </div>
-            `).join('');
-        }
-
-        function updateCorrelationsTab() {
-            const highConfidenceCount = correlations.filter(c => c.confidence === 'high').length;
-            
-            document.getElementById('correlationCount').textContent = highConfidenceCount;
-            document.getElementById('opportunityCount').textContent = highConfidenceCount;
-            
-            const correlationsList = document.getElementById('correlationsList');
-            
-            if (correlations.length === 0) {
-                correlationsList.innerHTML = '<div class="error">No correlations found</div>';
-                return;
-            }
-            
-            // Show only high confidence correlations
-            const highConfidenceCorrelations = correlations.filter(c => c.confidence === 'high');
-            
-            correlationsList.innerHTML = highConfidenceCorrelations.map(corr => `
-                <div class="alert-item">
-                    <div class="alert-header">
-                        <div class="alert-location">📍 ${corr.weather.location} ↔ ${corr.outage.plantName}</div>
-                        <div class="alert-severity severity-${corr.confidence === 'high' ? 'extreme' : 'severe'}">
-                            ${(corr.score * 100).toFixed(0)}%
-                        </div>
-                    </div>
-                    <div class="alert-details">
-                        <strong>Sales Opportunity:</strong><br>
-                        ${corr.analysis}
-                    </div>
-                    <div class="alert-time">Distance: ${corr.distance.toFixed(1)}km</div>
-                </div>
-            `).join('');
-        }
-
-        function updateMap() {
-            const mapContainer = document.getElementById('mapContainer');
-            mapContainer.innerHTML = ''; // Clear existing markers
-            
-            // Add weather markers
-            weatherData.forEach(weather => {
-                const marker = createMapMarker(weather, 'weather');
-                mapContainer.appendChild(marker);
-            });
-            
-            // Add outage markers
-            outageData.forEach(outage => {
-                const marker = createMapMarker(outage, 'outage');
-                mapContainer.appendChild(marker);
-            });
-            
-            // Add correlation lines (simplified)
-            correlations.filter(c => c.confidence === 'high').forEach(corr => {
-                const line = createCorrelationLine(corr);
-                mapContainer.appendChild(line);
-            });
-        }
-
-        function createMapMarker(data, type) {
-            const marker = document.createElement('div');
-            marker.className = `map-marker marker-${type}`;
-            
-            // Simple projection (not geographically accurate, but functional)
-            const x = ((data.longitude + 10) / 40) * 100; // Rough Europe bounds
-            const y = ((60 - data.latitude) / 25) * 100;
-            
-            marker.style.left = `${Math.max(5, Math.min(95, x))}%`;
-            marker.style.top = `${Math.max(5, Math.min(95, y))}%`;
-            
-            marker.title = `${data.location} - ${type === 'weather' ? data.type : data.plantName}`;
-            
-            return marker;
-        }
-
-        function createCorrelationLine(correlation) {
-            // Simplified correlation indicator
-            const indicator = document.createElement('div');
-            indicator.style.position = 'absolute';
-            indicator.style.width = '10px';
-            indicator.style.height = '10px';
-            indicator.style.background = '#10b981';
-            indicator.style.borderRadius = '50%';
-            indicator.style.border = '2px solid white';
-            
-            // Position between the two correlated points
-            const weatherX = ((correlation.weather.longitude + 10) / 40) * 100;
-            const weatherY = ((60 - correlation.weather.latitude) / 25) * 100;
-            const outageX = ((correlation.outage.longitude + 10) / 40) * 100;
-            const outageY = ((60 - correlation.outage.latitude) / 25) * 100;
-            
-            const midX = (weatherX + outageX) / 2;
-            const midY = (weatherY + outageY) / 2;
-            
-            indicator.style.left = `${Math.max(5, Math.min(95, midX))}%`;
-            indicator.style.top = `${Math.max(5, Math.min(95, midY))}%`;
-            indicator.style.transform = 'translate(-50%, -50%)';
-            
-            indicator.title = `Correlation: ${(correlation.score * 100).toFixed(0)}%`;
-            
-            return indicator;
-        }
-
-        function formatTime(timestamp) {
-            return new Date(timestamp).toLocaleString();
-        }
-
-        function clearData() {
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('consoleLog').innerHTML = '';
             weatherData = [];
             outageData = [];
             correlations = [];
-            updateUI();
-            document.getElementById('lastUpdate').textContent = 'Cleared';
+            updateStats();
         }
 
-        function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error';
-            errorDiv.textContent = message;
-            
-            // Show in the active tab
-            const activeTab = document.querySelector('.tab.active').textContent.toLowerCase();
-            const tabContent = document.getElementById(activeTab + 'Tab');
-            const loadingDiv = tabContent.querySelector('.loading') || tabContent.querySelector('.error');
-            
-            if (loadingDiv) {
-                loadingDiv.replaceWith(errorDiv);
-            } else {
-                tabContent.appendChild(errorDiv);
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedApiKey = localStorage.getItem('entsoeApiKey');
+            if (savedApiKey) {
+                document.getElementById('entsoeApiKey').value = savedApiKey;
             }
             
-            // Auto-remove after 5 seconds
-            setTimeout(() => {
-                if (errorDiv.parentNode) {
-                    errorDiv.remove();
-                }
-            }, 5000);
-        }
+            // Save API key when typed
+            document.getElementById('entsoeApiKey').addEventListener('change', function() {
+                localStorage.setItem('entsoeApiKey', this.value);
+            });
+            
+            logMessage('Grid Weather Correlation Agent initialized');
+            displayResults('System Ready', 'Click the test buttons to verify your API connections', 'info');
+        });
     </script>
 </body>
 </html>
-                            
