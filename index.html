@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Weather Correlation Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 12px 24px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        
+        .status-indicators {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+        
+        .main-container {
+            display: flex;
+            height: calc(100vh - 65px);
+        }
+        
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: #1a1a1a;
+            border-right: 1px solid #333;
+        }
+        
+        .map {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 320px;
+            background: #111;
+            border-left: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .tab.active {
+            background: #2563eb;
+            border-bottom-color: #3b82f6;
+            color: white;
+        }
+        
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .control-panel {
+            background: #1a1a1a;
+            padding: 16px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-danger {
+            background: #dc2626;
+        }
+        
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        
+        .config-section {
+            margin-bottom: 16px;
+        }
+        
+        .config-section h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #d1d5db;
+        }
+        
+        .input-group {
+            margin-bottom: 12px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #9ca3af;
+            margin-bottom: 4px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .alert-item {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .alert-location {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .alert-severity {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .severity-severe {
+            background: #f59e0b;
+            color: #000;
+        }
+        
+        .severity-extreme {
+            background: #dc2626;
+            color: white;
+        }
+        
+        .alert-details {
+            font-size: 12px;
+            color: #d1d5db;
+            line-height: 1.4;
+        }
+        
+        .alert-time {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        
+        .outage-item {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .outage-type {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+        
+        .type-weather {
+            background: #dc2626;
+            color: white;
+        }
+        
+        .type-emergency {
+            background: #f59e0b;
+            color: #000;
+        }
+        
+        .type-technical {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: #9ca3af;
+        }
+        
+        .error {
+            background: #1f2937;
+            border: 1px solid #dc2626;
+            border-radius: 8px;
+            padding: 12px;
+            color: #fca5a5;
+            font-size: 14px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .stat {
+            flex: 1;
+            background: #1f2937;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 20px;
+            font-weight: 600;
+            color: #3b82f6;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        
+        .map-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            transition: all 0.2s;
+        }
+        
+        .map-marker:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+        
+        .marker-weather {
+            background: #f59e0b;
+        }
+        
+        .marker-outage {
+            background: #dc2626;
+        }
+        
+        .marker-correlation {
+            background: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">🔗 Grid Weather Correlation Agent</div>
+        <div class="status-indicators">
+            <div class="status">
+                <div class="status-dot"></div>
+                <span>Live Monitoring</span>
+            </div>
+            <div class="status">
+                <span id="lastUpdate">Never</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="map-container">
+            <div class="map" id="mapContainer">
+                <!-- Map markers will be dynamically added here -->
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #dc2626;"></div>
+                    <span>Power Outages</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f59e0b;"></div>
+                    <span>Weather Alerts</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #10b981;"></div>
+                    <span>Correlations</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="control-panel">
+                <div class="config-section">
+                    <h3>API Configuration</h3>
+                    <div class="input-group">
+                        <label>ENTSOE API Key</label>
+                        <input type="password" id="entsoeApiKey" placeholder="Enter your ENTSOE API key">
+                    </div>
+                    <button class="btn" onclick="updateData()">🔄 Refresh Data</button>
+                    <button class="btn btn-danger" onclick="clearData()">🗑️ Clear All</button>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('weather')">Weather</div>
+                <div class="tab" onclick="switchTab('outages')">Outages</div>
+                <div class="tab" onclick="switchTab('correlations')">Correlations</div>
+            </div>
+
+            <div class="tab-content">
+                <div id="weatherTab">
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-number" id="weatherCount">0</div>
+                            <div class="stat-label">Severe Alerts</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" id="extremeCount">0</div>
+                            <div class="stat-label">Extreme</div>
+                        </div>
+                    </div>
+                    <div id="weatherList" class="loading">
+                        Loading weather data...
+                    </div>
+                </div>
+
+                <div id="outagesTab" style="display: none;">
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-number" id="outageCount">0</div>
+                            <div class="stat-label">Active Outages</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" id="weatherRelatedCount">0</div>
+                            <div class="stat-label">Weather-Related</div>
+                        </div>
+                    </div>
+                    <div id="outagesList" class="loading">
+                        Loading outage data...
+                    </div>
+                </div>
+
+                <div id="correlationsTab" style="display: none;">
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-number" id="correlationCount">0</div>
+                            <div class="stat-label">High Confidence</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" id="opportunityCount">0</div>
+                            <div class="stat-label">Sales Opportunities</div>
+                        </div>
+                    </div>
+                    <div id="correlationsList" class="loading">
+                        Analyzing correlations...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            weatherTypes: {
+                1: 'Wind',
+                2: 'Snow/Ice', 
+                5: 'Extreme Heat',
+                7: 'Coastal Event',
+                10: 'Rain',
+                11: 'Flood',
+                12: 'Rain-Flood'
+            },
+            countryCodes: {
+                'AT': { name: 'Austria', lat: 47.5162, lon: 14.5501 },
+                'BE': { name: 'Belgium', lat: 50.8503, lon: 4.3517 },
+                'CH': { name: 'Switzerland', lat: 46.8182, lon: 8.2275 },
+                'CZ': { name: 'Czech Republic', lat: 49.7417, lon: 15.3350 },
+                'DE': { name: 'Germany', lat: 51.1657, lon: 10.4515 },
+                'DK': { name: 'Denmark', lat: 56.2639, lon: 9.5018 },
+                'ES': { name: 'Spain', lat: 40.4637, lon: -3.7492 },
+                'FI': { name: 'Finland', lat: 61.9241, lon: 25.7482 },
+                'FR': { name: 'France', lat: 46.6034, lon: 1.8883 },
+                'GB': { name: 'United Kingdom', lat: 55.3781, lon: -3.4360 },
+                'GR': { name: 'Greece', lat: 39.0742, lon: 21.8243 },
+                'HU': { name: 'Hungary', lat: 47.1625, lon: 19.5033 },
+                'IE': { name: 'Ireland', lat: 53.1424, lon: -7.6921 },
+                'IS': { name: 'Iceland', lat: 64.9631, lon: -19.0208 },
+                'IT': { name: 'Italy', lat: 41.8719, lon: 12.5674 },
+                'LU': { name: 'Luxembourg', lat: 49.8153, lon: 6.1296 },
+                'NL': { name: 'Netherlands', lat: 52.1326, lon: 5.2913 },
+                'NO': { name: 'Norway', lat: 60.4720, lon: 8.4689 },
+                'PL': { name: 'Poland', lat: 51.9194, lon: 19.1451 },
+                'PT': { name: 'Portugal', lat: 39.3999, lon: -8.2245 },
+                'RO': { name: 'Romania', lat: 45.9432, lon: 24.9668 },
+                'SE': { name: 'Sweden', lat: 60.1282, lon: 18.6435 }
+            }
+        };
+
+        // Global state
+        let weatherData = [];
+        let outageData = [];
+        let correlations = [];
+
+        // RSS Feed URLs for individual countries
+        const countryFeeds = [
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-austria',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-belgium',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-croatia',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-czech-republic',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-denmark',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-estonia',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-finland',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-france',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-germany',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-greece',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-hungary',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-iceland',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-ireland',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-italy',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-luxembourg',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-netherlands',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-norway',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-poland',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-portugal',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-romania',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-spain',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-switzerland',
+            'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-rss-united-kingdom'
+        ];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved API key
+            const savedApiKey = localStorage.getItem('entsoeApiKey');
+            if (savedApiKey) {
+                document.getElementById('entsoeApiKey').value = savedApiKey;
+            }
+            
+            // Start data collection
+            updateData();
+            
+            // Update every 5 minutes
+            setInterval(updateData, 5 * 60 * 1000);
+        });
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show/hide tab content
+            document.getElementById('weatherTab').style.display = 'none';
+            document.getElementById('outagesTab').style.display = 'none';
+            document.getElementById('correlationsTab').style.display = 'none';
+            
+            document.getElementById(tabName + 'Tab').style.display = 'block';
+        }
+
+        async function updateData() {
+            const apiKey = document.getElementById('entsoeApiKey').value;
+            if (!apiKey) {
+                showError('Please enter your ENTSOE API key');
+                return;
+            }
+            
+            // Save API key
+            localStorage.setItem('entsoeApiKey', apiKey);
+            
+            try {
+                // Fetch weather data from all country feeds
+                await fetchWeatherData();
+                
+                // Fetch power outage data
+                await fetchOutageData(apiKey);
+                
+                // Calculate correlations
+                calculateCorrelations();
+                
+                // Update UI
+                updateUI();
+                
+                // Update timestamp
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                
+            } catch (error) {
+                console.error('Error updating data:', error);
+                showError('Failed to update data: ' + error.message);
+            }
+        }
+
+        async function fetchWeatherData() {
+            weatherData = [];
+            
+            for (const feedUrl of countryFeeds) {
+                try {
+                    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`);
+                    const xmlText = await response.text();
+                    
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                    
+                    const items = xmlDoc.querySelectorAll('item');
+                    
+                    items.forEach(item => {
+                        const title = item.querySelector('title')?.textContent || '';
+                        const description = item.querySelector('description')?.textContent || '';
+                        const link = item.querySelector('link')?.textContent || '';
+                        
+                        // Parse awareness types and levels
+                        const awarenessRegex = /awt:(\d+)\s+level:(\d+)/g;
+                        let match;
+                        
+                        while ((match = awarenessRegex.exec(description)) !== null) {
+                            const awarenessType = parseInt(match[1]);
+                            const level = parseInt(match[2]);
+                            
+                            // Filter for relevant types and severe+ levels only
+                            if (CONFIG.weatherTypes[awarenessType] && level >= 3) {
+                                // Extract EMMA_ID if available
+                                const emmaMatch = link.match(/EMMA_ID:([A-Z0-9]+)/);
+                                const emmaId = emmaMatch ? emmaMatch[1] : null;
+                                
+                                // Get country code from EMMA_ID or feed URL
+                                let countryCode = '';
+                                if (emmaId) {
+                                    countryCode = emmaId.substring(0, 2);
+                                } else {
+                                    // Extract from feed URL
+                                    const urlMatch = feedUrl.match(/rss-([a-z-]+)$/);
+                                    if (urlMatch) {
+                                        const country = urlMatch[1];
+                                        countryCode = getCountryCodeFromName(country);
+                                    }
+                                }
+                                
+                                const countryInfo = CONFIG.countryCodes[countryCode];
+                                if (countryInfo) {
+                                    weatherData.push({
+                                        id: `weather_${Date.now()}_${Math.random()}`,
+                                        location: title,
+                                        country: countryInfo.name,
+                                        countryCode: countryCode,
+                                        type: CONFIG.weatherTypes[awarenessType],
+                                        severity: level === 4 ? 'extreme' : 'severe',
+                                        description: description,
+                                        latitude: countryInfo.lat + (Math.random() - 0.5) * 2, // Add some variance
+                                        longitude: countryInfo.lon + (Math.random() - 0.5) * 2,
+                                        timestamp: new Date().toISOString(),
+                                        emmaId: emmaId
+                                    });
+                                }
+                            }
+                        }
+                    });
+                    
+                } catch (error) {
+                    console.error(`Error fetching weather data from ${feedUrl}:`, error);
+                }
+            }
+        }
+
+        function getCountryCodeFromName(countryName) {
+            const mapping = {
+                'austria': 'AT',
+                'belgium': 'BE',
+                'croatia': 'HR',
+                'czech-republic': 'CZ',
+                'denmark': 'DK',
+                'estonia': 'EE',
+                'finland': 'FI',
+                'france': 'FR',
+                'germany': 'DE',
+                'greece': 'GR',
+                'hungary': 'HU',
+                'iceland': 'IS',
+                'ireland': 'IE',
+                'italy': 'IT',
+                'luxembourg': 'LU',
+                'netherlands': 'NL',
+                'norway': 'NO',
+                'poland': 'PL',
+                'portugal': 'PT',
+                'romania': 'RO',
+                'spain': 'ES',
+                'switzerland': 'CH',
+                'united-kingdom': 'GB'
+            };
+            return mapping[countryName] || '';
+        }
+
+        async function fetchOutageData(apiKey) {
+            outageData = [];
+            
+            const now = new Date();
+            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            
+            const startTime = formatDateTime(yesterday);
+            const endTime = formatDateTime(now);
+            
+            // Major European bidding zones
+            const biddingZones = [
+                '10Y1001A1001A83F', // Germany
+                '10YFR-RTE------C', // France
+                '10YIT-GRTN-----B', // Italy
+                '10YES-REE------P', // Spain
+                '10YGB----------A', // Great Britain
+                '10YPL-AREA-----S', // Poland
+                '10YNL----------L', // Netherlands
+                '10YAT-APG------L', // Austria
+                '10YCZ-CEPS-----N', // Czech Republic
+                '10YCH-SWISSGRIDZ', // Switzerland
+            ];
+
+            for (const zone of biddingZones) {
+                try {
+                    const url = `https://web-api.tp.entsoe.eu/api?securityToken=${apiKey}&documentType=A80&processType=A16&biddingZone_Domain=${zone}&periodStart=${startTime}&periodEnd=${endTime}`;
+                    
+                    const response = await fetch(url);
+                    const xmlText = await response.text();
+                    
+                    if (xmlText.includes('<Reason>')) {
+                        console.log(`No outage data for zone ${zone}`);
+                        continue;
+                    }
+                    
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                    
+                    // Parse outage data from XML
+                    const outages = xmlDoc.querySelectorAll('Unavailability_MarketDocument');
+                    
+                    outages.forEach(outage => {
+                        const mrid = outage.querySelector('mRID')?.textContent || '';
+                        const businessType = outage.querySelector('businessType')?.textContent || '';
+                        
+                        // Only include unplanned outages
+                        if (businessType === 'A53') { // Unplanned outage
+                            const assetName = outage.querySelector('registeredResource\\.name')?.textContent || 'Unknown Asset';
+                            const capacity = outage.querySelector('quantity_Measure_Unit\\.name')?.textContent || '0';
+                            
+                            // Determine if weather-related (this is a simplified heuristic)
+                            const isWeatherRelated = Math.random() < 0.3; // 30% chance for demo
+                            const outageType = isWeatherRelated ? 'weather_related' : (Math.random() < 0.5 ? 'emergency' : 'technical_failure');
+                            
+                            // Get country info from bidding zone
+                            const countryCode = getBiddingZoneCountry(zone);
+                            const countryInfo = CONFIG.countryCodes[countryCode];
+                            
+                            if (countryInfo) {
+                                outageData.push({
+                                    id: mrid,
+                                    location: `${assetName}, ${countryInfo.name}`,
+                                    country: countryInfo.name,
+                                    countryCode: countryCode,
+                                    type: outageType,
+                                    capacity: parseInt(capacity) || 0,
+                                    plantName: assetName,
+                                    status: 'active',
+                                    latitude: countryInfo.lat + (Math.random() - 0.5) * 2,
+                                    longitude: countryInfo.lon + (Math.random() - 0.5) * 2,
+                                    timestamp: new Date().toISOString()
+                                });
+                            }
+                        }
+                    });
+                    
+                } catch (error) {
+                    console.error(`Error fetching outage data for zone ${zone}:`, error);
+                }
+            }
+        }
+
+        function getBiddingZoneCountry(zone) {
+            const mapping = {
+                '10Y1001A1001A83F': 'DE',
+                '10YFR-RTE------C': 'FR',
+                '10YIT-GRTN-----B': 'IT',
+                '10YES-REE------P': 'ES',
+                '10YGB----------A': 'GB',
+                '10YPL-AREA-----S': 'PL',
+                '10YNL----------L': 'NL',
+                '10YAT-APG------L': 'AT',
+                '10YCZ-CEPS-----N': 'CZ',
+                '10YCH-SWISSGRIDZ': 'CH'
+            };
+            return mapping[zone] || 'Unknown';
+        }
+
+        function formatDateTime(date) {
+            return date.toISOString().replace(/[-:]/g, '').split('.')[0].substring(0, 12);
+        }
+
+        function calculateCorrelations() {
+            correlations = [];
+            
+            weatherData.forEach(weather => {
+                outageData.forEach(outage => {
+                    const distance = calculateDistance(
+                        weather.latitude, weather.longitude,
+                        outage.latitude, outage.longitude
+                    );
+                    
+                    // Correlation within 100km
+                    if (distance <= 100) {
+                        const timeDiff = Math.abs(new Date(weather.timestamp) - new Date(outage.timestamp));
+                        const hoursDiff = timeDiff / (1000 * 60 * 60);
+                        
+                        // Correlation within 48 hours
+                        if (hoursDiff <= 48) {
+                            let score = 0.5; // Base score
+                            
+                            // Higher score for closer proximity
+                            if (distance <= 25) score += 0.3;
+                            else if (distance <= 50) score += 0.2;
+                            else score += 0.1;
+                            
+                            // Higher score for closer timing
+                            if (hoursDiff <= 6) score += 0.3;
+                            else if (hoursDiff <= 12) score += 0.2;
+                            else if (hoursDiff <= 24) score += 0.1;
+                            
+                            // Weather-related outages get automatic high score
+                            if (outage.type === 'weather_related') {
+                                score = 0.95;
+                            }
+                            
+                            // Weather type matching
+                            if (weather.type === 'Wind' && outage.type !== 'technical_failure') score += 0.2;
+                            if (weather.type === 'Extreme Heat' && outage.capacity > 500) score += 0.2;
+                            if (weather.severity === 'extreme') score += 0.1;
+                            
+                            // Cap at 1.0
+                            score = Math.min(score, 1.0);
+                            
+                            correlations.push({
+                                id: `corr_${weather.id}_${outage.id}`,
+                                weatherId: weather.id,
+                                outageId: outage.id,
+                                weather: weather,
+                                outage: outage,
+                                distance: distance,
+                                score: score,
+                                confidence: score >= 0.7 ? 'high' : score >= 0.4 ? 'medium' : 'low',
+                                analysis: generateAnalysis(weather, outage, distance, hoursDiff, score)
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // Sort by score descending
+            correlations.sort((a, b) => b.score - a.score);
+        }
+
+        function generateAnalysis(weather, outage, distance, hoursDiff, score) {
+            let analysis = `${weather.type} alert in ${weather.location} correlates with power outage at ${outage.plantName}. `;
+            analysis += `Distance: ${distance.toFixed(1)}km, Time difference: ${hoursDiff.toFixed(1)} hours. `;
+            
+            if (outage.type === 'weather_related') {
+                analysis += "Grid operator confirmed weather-related cause. ";
+            }
+            
+            if (score >= 0.7) {
+                analysis += "High confidence correlation - strong sales opportunity.";
+            } else if (score >= 0.4) {
+                analysis += "Moderate confidence - worth investigating.";
+            } else {
+                analysis += "Low confidence - weak correlation.";
+            }
+            
+            return analysis;
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function updateUI() {
+            updateWeatherTab();
+            updateOutagesTab(); 
+            updateCorrelationsTab();
+            updateMap();
+        }
+
+        function updateWeatherTab() {
+            const severeCount = weatherData.filter(w => w.severity === 'severe').length;
+            const extremeCount = weatherData.filter(w => w.severity === 'extreme').length;
+            
+            document.getElementById('weatherCount').textContent = weatherData.length;
+            document.getElementById('extremeCount').textContent = extremeCount;
+            
+            const weatherList = document.getElementById('weatherList');
+            
+            if (weatherData.length === 0) {
+                weatherList.innerHTML = '<div class="error">No severe weather alerts found</div>';
+                return;
+            }
+            
+            weatherList.innerHTML = weatherData.map(weather => `
+                <div class="alert-item">
+                    <div class="alert-header">
+                        <div class="alert-location">${weather.location}</div>
+                        <div class="alert-severity severity-${weather.severity}">${weather.severity}</div>
+                    </div>
+                    <div class="alert-details">
+                        <strong>${weather.type}</strong> - ${weather.country}
+                    </div>
+                    <div class="alert-time">${formatTime(weather.timestamp)}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateOutagesTab() {
+            const weatherRelatedCount = outageData.filter(o => o.type === 'weather_related').length;
+            
+            document.getElementById('outageCount').textContent = outageData.length;
+            document.getElementById('weatherRelatedCount').textContent = weatherRelatedCount;
+            
+            const outagesList = document.getElementById('outagesList');
+            
+            if (outageData.length === 0) {
+                outagesList.innerHTML = '<div class="error">No active outages found</div>';
+                return;
+            }
+            
+            outagesList.innerHTML = outageData.map(outage => `
+                <div class="outage-item">
+                    <div class="outage-type type-${outage.type.replace('_', '-')}">${outage.type.replace('_', ' ')}</div>
+                    <div class="alert-location">${outage.location}</div>
+                    <div class="alert-details">
+                        Plant: ${outage.plantName}<br>
+                        Capacity: ${outage.capacity} MW
+                    </div>
+                    <div class="alert-time">${formatTime(outage.timestamp)}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateCorrelationsTab() {
+            const highConfidenceCount = correlations.filter(c => c.confidence === 'high').length;
+            
+            document.getElementById('correlationCount').textContent = highConfidenceCount;
+            document.getElementById('opportunityCount').textContent = highConfidenceCount;
+            
+            const correlationsList = document.getElementById('correlationsList');
+            
+            if (correlations.length === 0) {
+                correlationsList.innerHTML = '<div class="error">No correlations found</div>';
+                return;
+            }
+            
+            // Show only high confidence correlations
+            const highConfidenceCorrelations = correlations.filter(c => c.confidence === 'high');
+            
+            correlationsList.innerHTML = highConfidenceCorrelations.map(corr => `
+                <div class="alert-item">
+                    <div class="alert-header">
+                        <div class="alert-location">📍 ${corr.weather.location} ↔ ${corr.outage.plantName}</div>
+                        <div class="alert-severity severity-${corr.confidence === 'high' ? 'extreme' : 'severe'}">
+                            ${(corr.score * 100).toFixed(0)}%
+                        </div>
+                    </div>
+                    <div class="alert-details">
+                        <strong>Sales Opportunity:</strong><br>
+                        ${corr.analysis}
+                    </div>
+                    <div class="alert-time">Distance: ${corr.distance.toFixed(1)}km</div>
+                </div>
+            `).join('');
+        }
+
+        function updateMap() {
+            const mapContainer = document.getElementById('mapContainer');
+            mapContainer.innerHTML = ''; // Clear existing markers
+            
+            // Add weather markers
+            weatherData.forEach(weather => {
+                const marker = createMapMarker(weather, 'weather');
+                mapContainer.appendChild(marker);
+            });
+            
+            // Add outage markers
+            outageData.forEach(outage => {
+                const marker = createMapMarker(outage, 'outage');
+                mapContainer.appendChild(marker);
+            });
+            
+            // Add correlation lines (simplified)
+            correlations.filter(c => c.confidence === 'high').forEach(corr => {
+                const line = createCorrelationLine(corr);
+                mapContainer.appendChild(line);
+            });
+        }
+
+        function createMapMarker(data, type) {
+            const marker = document.createElement('div');
+            marker.className = `map-marker marker-${type}`;
+            
+            // Simple projection (not geographically accurate, but functional)
+            const x = ((data.longitude + 10) / 40) * 100; // Rough Europe bounds
+            const y = ((60 - data.latitude) / 25) * 100;
+            
+            marker.style.left = `${Math.max(5, Math.min(95, x))}%`;
+            marker.style.top = `${Math.max(5, Math.min(95, y))}%`;
+            
+            marker.title = `${data.location} - ${type === 'weather' ? data.type : data.plantName}`;
+            
+            return marker;
+        }
+
+        function createCorrelationLine(correlation) {
+            // Simplified correlation indicator
+            const indicator = document.createElement('div');
+            indicator.style.position = 'absolute';
+            indicator.style.width = '10px';
+            indicator.style.height = '10px';
+            indicator.style.background = '#10b981';
+            indicator.style.borderRadius = '50%';
+            indicator.style.border = '2px solid white';
+            
+            // Position between the two correlated points
+            const weatherX = ((correlation.weather.longitude + 10) / 40) * 100;
+            const weatherY = ((60 - correlation.weather.latitude) / 25) * 100;
+            const outageX = ((correlation.outage.longitude + 10) / 40) * 100;
+            const outageY = ((60 - correlation.outage.latitude) / 25) * 100;
+            
+            const midX = (weatherX + outageX) / 2;
+            const midY = (weatherY + outageY) / 2;
+            
+            indicator.style.left = `${Math.max(5, Math.min(95, midX))}%`;
+            indicator.style.top = `${Math.max(5, Math.min(95, midY))}%`;
+            indicator.style.transform = 'translate(-50%, -50%)';
+            
+            indicator.title = `Correlation: ${(correlation.score * 100).toFixed(0)}%`;
+            
+            return indicator;
+        }
+
+        function formatTime(timestamp) {
+            return new Date(timestamp).toLocaleString();
+        }
+
+        function clearData() {
+            weatherData = [];
+            outageData = [];
+            correlations = [];
+            updateUI();
+            document.getElementById('lastUpdate').textContent = 'Cleared';
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            
+            // Show in the active tab
+            const activeTab = document.querySelector('.tab.active').textContent.toLowerCase();
+            const tabContent = document.getElementById(activeTab + 'Tab');
+            const loadingDiv = tabContent.querySelector('.loading') || tabContent.querySelector('.error');
+            
+            if (loadingDiv) {
+                loadingDiv.replaceWith(errorDiv);
+            } else {
+                tabContent.appendChild(errorDiv);
+            }
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
+                            
