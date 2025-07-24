@@ -418,7 +418,7 @@
                 const proxyUrl = vercelProxy + encodeURIComponent(testUrl);
                 
                 logMessage(`Using Vercel proxy: ${vercelProxy}`);
-                displayResults('Vercel Proxy Test', `Testing your proxy: ${window.location.origin}/api/proxy`, 'info');
+                displayResults('Vercel Proxy Test', `Testing your proxy: https://climate-data-inky.vercel.app/api/proxy`, 'info');
                 
                 updateDebugInfo(proxyUrl, 'Testing your Vercel proxy...', '');
                 
@@ -463,7 +463,7 @@
                 displayResults('Troubleshooting', `
                     If your proxy isn't working:
                     1. Check that api/proxy.js was deployed to Vercel
-                    2. Visit ${window.location.origin}/api/proxy directly to test
+                    2. Visit https://climate-data-inky.vercel.app/api/proxy directly to test
                     3. Check Vercel deployment logs for errors
                 `, 'error');
             }
@@ -548,8 +548,8 @@
             logMessage(`API URL: ${apiUrl}`);
             
             try {
-                // Use YOUR Vercel proxy
-                const vercelProxy = `${window.location.origin}/api/proxy?url=`;
+                // Use YOUR Vercel proxy - hardcode your URL
+                const vercelProxy = `https://climate-data-inky.vercel.app/api/proxy?url=`;
                 const proxyUrl = vercelProxy + encodeURIComponent(apiUrl);
                 
                 logMessage(`Using Vercel proxy for ENTSOE: ${vercelProxy}`);
